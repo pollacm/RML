@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
 namespace RML.Returners
@@ -58,187 +59,243 @@ namespace RML.Returners
     {
             var returners = new List<Returner>();
             var espnUrlTemplate = "http://www.espn.com/nfl/team/depth/_/name/{0}/formation/special-teams";
-            var yahooUrlTemplate = "http://in.sports.yahoo.com/nfl/teams/{0}/depthchart?nfl-pos=special";
+            var yahooUrlTemplate = "https://sports.yahoo.com/nfl/teams/{0}/roster/";
 
             foreach (var siteCode in siteCodes)
             {
+                _driver.Navigate().GoToUrl(string.Format(yahooUrlTemplate, siteCode.YahooCode));
+                _driver.FindElement(By.XPath("//li[contains(.,'Specialists')]")).Click();
+                System.Threading.Thread.Sleep(1000);
+
                 var returner = new Returner();
-                returner.Team = siteCode.TeamCode;
-                //Console.WriteLine("SiteCode: " + siteCode.TeamCode);
-                using (WebClient client = new WebClient())
+
+                var yahooKickReturnersElement = _driver.FindElements(By.XPath("//div/h4[contains(.,'Kick Returner')]"));
+                if (yahooKickReturnersElement.Count == 1)
                 {
-                    var espnUrl = string.Format(espnUrlTemplate, siteCode.EspnCode);
-                    string espnHtml = client.DownloadString(espnUrl);
-                    var espnHasKickReturner = false;
-                    var espnHasPuntReturner = false;
+                    var yahooKickReturners = yahooKickReturnersElement[0].FindElements(By.XPath("./parent::div/ul/li/div/a"));
 
-                    doc = new HtmlDocument();
-                    doc.LoadHtml(espnHtml);
-
-                    //Console.WriteLine("ESPN Punt Returner Start: ");
-                    var players = doc.DocumentNode
-                        .Descendants("div")
-                        .Where(d =>
-                                   d.Attributes.Contains("class")
-                                   &&
-                                   d.Attributes["class"].Value.Contains("field-group row-2")
-                              ).Single().InnerHtml;
-                    //Console.WriteLine("ESPN Punt Returner End: ");
-                    espnHasKickReturner = players.Contains("Kick Returner");
-                    espnHasPuntReturner = players.Contains("Punt Returner");
-                    //Console.WriteLine("ESPN Punt Returners Set: ");
-                    doc = new HtmlDocument();
-                    doc.LoadHtml(players);
-                    //Console.WriteLine("ESPN Kick Returner Start: ");
-                    var espnReturners = doc.DocumentNode
-                        .Descendants("ul")
-                        .Where(d =>
-                                   d.Attributes.Contains("class")
-                                   &&
-                                   d.Attributes["class"].Value.Contains("players")
-                              ).ToArray();
-                    //Console.WriteLine("ESPN Kick Returner End: ");
-                    if (espnHasKickReturner)
+                    if (yahooKickReturners.Count > 0)
                     {
-                        var kickReturnersNode = espnReturners[0];
-
-                        doc = new HtmlDocument();
-                        doc.LoadHtml(kickReturnersNode.InnerHtml);
-                        var kickReturners = doc.DocumentNode
-                            .Descendants("a").ToArray();
-
-                        for (var index = 0; index < kickReturners.Count(); index++)
-                        {
-                            if (index == 0)
-                            {
-                                returner.EspnPrimaryKickReturner = kickReturners[index].InnerText;
-                            }
-
-                            if (index == 1)
-                            {
-                                returner.EspnSecondaryKickReturner = kickReturners[index].InnerText;
-                            }
-
-                            if (index == 2)
-                            {
-                                returner.EspnTertiaryKickReturner = kickReturners[index].InnerText;
-                            }
-                        }
+                        returner.YahooPrimaryKickReturner = yahooKickReturners[0].Text;
                     }
-                    //Console.WriteLine("ESPN Kick Returner Set: ");
-
-                    if (espnHasPuntReturner)
+                    if (yahooKickReturners.Count > 1)
                     {
-                        var puntReturnersNode = espnHasKickReturner ? espnReturners[1] : espnReturners[0];
-                        doc = new HtmlDocument();
-                        doc.LoadHtml(puntReturnersNode.InnerHtml);
-                        var puntReturners = doc.DocumentNode
-                            .Descendants("a").ToArray();
-
-                        for (var index = 0; index < puntReturners.Count(); index++)
-                        {
-                            if (index == 0)
-                            {
-                                returner.EspnPrimaryPuntReturner = puntReturners[index].InnerText;
-                            }
-
-                            if (index == 1)
-                            {
-                                returner.EspnSecondaryPuntReturner = puntReturners[index].InnerText;
-                            }
-
-                            if (index == 2)
-                            {
-                                returner.EspnTertiaryPuntReturner = puntReturners[index].InnerText;
-                            }
-                        }
+                        returner.YahooSecondaryKickReturner = yahooKickReturners[1].Text;
                     }
-
-                    var yahooUrl = string.Format(yahooUrlTemplate, siteCode.YahooCode);
-                    string yahooHtml = client.DownloadString(yahooUrl);
-                    doc = new HtmlDocument();
-                    doc.LoadHtml(yahooHtml);
-                    //Console.WriteLine("Yahoo Data Loaded: ");
-                    var playersYahoo = doc.DocumentNode
-                                           .Descendants("li")
-                                           .Where(d =>
-                                                      d.Attributes.Contains("class")
-                                                      &&
-                                                      d.Attributes["class"].Value.Contains("kick-returner")
-                                                 ).SingleOrDefault()?.InnerHtml ?? string.Empty;
-                    //Console.WriteLine("Yahoo data loaded complete: ");
-                    if (!string.IsNullOrEmpty(playersYahoo))
+                    if (yahooKickReturners.Count > 2)
                     {
-                        doc = new HtmlDocument();
-                        doc.LoadHtml(playersYahoo);
-                        //Console.WriteLine("Yahoo kick returners start: ");
-                        var kickReturnersYahoo = doc.DocumentNode
-                            .Descendants("a").ToArray();
-
-                        for (var index = 0; index < kickReturnersYahoo.Count(); index++)
-                        {
-                            if (index == 0)
-                            {
-                                returner.YahooPrimaryKickReturner = kickReturnersYahoo[index].InnerText;
-                            }
-
-                            if (index == 1)
-                            {
-                                returner.YahooSecondaryKickReturner = kickReturnersYahoo[index].InnerText;
-                            }
-
-                            if (index == 2)
-                            {
-                                returner.YahooTertiaryKickReturner = kickReturnersYahoo[index].InnerText;
-                            }
-                        }
-
-                        //Console.WriteLine("Yahoo Kick Returners Set: ");
-                    }
-
-                    doc = new HtmlDocument();
-                    doc.LoadHtml(yahooHtml);
-                    //Console.WriteLine("Yahoo punt Returner Start: ");
-                    playersYahoo = doc.DocumentNode
-                        .Descendants("li")
-                        .Where(d =>
-                                   d.Attributes.Contains("class")
-                                   &&
-                                   d.Attributes["class"].Value.Contains("punt-returner")
-                              ).Single().InnerHtml;
-                    //Console.WriteLine("Yahoo Punt Returner End: ");
-                    doc = new HtmlDocument();
-                    doc.LoadHtml(playersYahoo);
-
-                    var puntReturnersYahoo = doc.DocumentNode
-                        .Descendants("a").ToArray();
-
-                    for (var index = 0; index < puntReturnersYahoo.Count(); index++)
-                    {
-                        if (index == 0)
-                        {
-                            returner.YahooPrimaryPuntReturner = puntReturnersYahoo[index].InnerText;
-                        }
-
-                        if (index == 1)
-                        {
-                            returner.YahooSecondaryPuntReturner = puntReturnersYahoo[index].InnerText;
-                        }
-
-                        if (index == 2)
-                        {
-                            returner.YahooTertiaryPuntReturner = puntReturnersYahoo[index].InnerText;
-                        }
-                    }
-                    //Console.WriteLine("Yahoo punt returners set: ");
-
-                    //Console.WriteLine(returner);
-                    returners.Add(returner);
-                    if (returners.Count % 5 == 0)
-                    {
-                        Console.WriteLine(returners.Count);
+                        returner.YahooTertiaryKickReturner = yahooKickReturners[2].Text;
                     }
                 }
+
+                var yahooPuntReturnersElement = _driver.FindElements(By.XPath("//div/h4[contains(.,'Punt Returner')]"));
+                if (yahooPuntReturnersElement.Count == 1)
+                {
+                    var yahooPuntReturners = yahooPuntReturnersElement[0].FindElements(By.XPath("./parent::div/ul/li/div/a"));
+
+                    if (yahooPuntReturners.Count > 0)
+                    {
+                        returner.YahooPrimaryPuntReturner = yahooPuntReturners[0].Text;
+                    }
+                    if (yahooPuntReturners.Count > 1)
+                    {
+                        returner.YahooSecondaryPuntReturner = yahooPuntReturners[1].Text;
+                    }
+                    if (yahooPuntReturners.Count > 2)
+                    {
+                        returner.YahooTertiaryPuntReturner = yahooPuntReturners[2].Text;
+                    }
+                }
+
+
+
+
+
+
+
+
+
+
+
+                returners.Add(returner);
+
+                //var returner = new Returner();
+                //returner.Team = siteCode.TeamCode;
+                ////Console.WriteLine("SiteCode: " + siteCode.TeamCode);
+                //using (WebClient client = new WebClient())
+                //{
+                //    var espnUrl = string.Format(espnUrlTemplate, siteCode.EspnCode);
+                //    string espnHtml = client.DownloadString(espnUrl);
+                //    var espnHasKickReturner = false;
+                //    var espnHasPuntReturner = false;
+
+                //    doc = new HtmlDocument();
+                //    doc.LoadHtml(espnHtml);
+
+                //    //Console.WriteLine("ESPN Punt Returner Start: ");
+                //    var players = doc.DocumentNode
+                //        .Descendants("div")
+                //        .Where(d =>
+                //                   d.Attributes.Contains("class")
+                //                   &&
+                //                   d.Attributes["class"].Value.Contains("field-group row-2")
+                //              ).Single().InnerHtml;
+                //    //Console.WriteLine("ESPN Punt Returner End: ");
+                //    espnHasKickReturner = players.Contains("Kick Returner");
+                //    espnHasPuntReturner = players.Contains("Punt Returner");
+                //    //Console.WriteLine("ESPN Punt Returners Set: ");
+                //    doc = new HtmlDocument();
+                //    doc.LoadHtml(players);
+                //    //Console.WriteLine("ESPN Kick Returner Start: ");
+                //    var espnReturners = doc.DocumentNode
+                //        .Descendants("ul")
+                //        .Where(d =>
+                //                   d.Attributes.Contains("class")
+                //                   &&
+                //                   d.Attributes["class"].Value.Contains("players")
+                //              ).ToArray();
+                //    //Console.WriteLine("ESPN Kick Returner End: ");
+                //    if (espnHasKickReturner)
+                //    {
+                //        var kickReturnersNode = espnReturners[0];
+
+                //        doc = new HtmlDocument();
+                //        doc.LoadHtml(kickReturnersNode.InnerHtml);
+                //        var kickReturners = doc.DocumentNode
+                //            .Descendants("a").ToArray();
+
+                //        for (var index = 0; index < kickReturners.Count(); index++)
+                //        {
+                //            if (index == 0)
+                //            {
+                //                returner.EspnPrimaryKickReturner = kickReturners[index].InnerText;
+                //            }
+
+                //            if (index == 1)
+                //            {
+                //                returner.EspnSecondaryKickReturner = kickReturners[index].InnerText;
+                //            }
+
+                //            if (index == 2)
+                //            {
+                //                returner.EspnTertiaryKickReturner = kickReturners[index].InnerText;
+                //            }
+                //        }
+                //    }
+                //    //Console.WriteLine("ESPN Kick Returner Set: ");
+
+                //    if (espnHasPuntReturner)
+                //    {
+                //        var puntReturnersNode = espnHasKickReturner ? espnReturners[1] : espnReturners[0];
+                //        doc = new HtmlDocument();
+                //        doc.LoadHtml(puntReturnersNode.InnerHtml);
+                //        var puntReturners = doc.DocumentNode
+                //            .Descendants("a").ToArray();
+
+                //        for (var index = 0; index < puntReturners.Count(); index++)
+                //        {
+                //            if (index == 0)
+                //            {
+                //                returner.EspnPrimaryPuntReturner = puntReturners[index].InnerText;
+                //            }
+
+                //            if (index == 1)
+                //            {
+                //                returner.EspnSecondaryPuntReturner = puntReturners[index].InnerText;
+                //            }
+
+                //            if (index == 2)
+                //            {
+                //                returner.EspnTertiaryPuntReturner = puntReturners[index].InnerText;
+                //            }
+                //        }
+                //    }
+
+                //    var yahooUrl = string.Format(yahooUrlTemplate, siteCode.YahooCode);
+                //    string yahooHtml = client.DownloadString(yahooUrl);
+                //    doc = new HtmlDocument();
+                //    doc.LoadHtml(yahooHtml);
+                //    //Console.WriteLine("Yahoo Data Loaded: ");
+                //    var playersYahoo = doc.DocumentNode
+                //                           .Descendants("li")
+                //                           .Where(d =>
+                //                                      d.Attributes.Contains("class")
+                //                                      &&
+                //                                      d.Attributes["class"].Value.Contains("kick-returner")
+                //                                 ).SingleOrDefault()?.InnerHtml ?? string.Empty;
+                //    //Console.WriteLine("Yahoo data loaded complete: ");
+                //    if (!string.IsNullOrEmpty(playersYahoo))
+                //    {
+                //        doc = new HtmlDocument();
+                //        doc.LoadHtml(playersYahoo);
+                //        //Console.WriteLine("Yahoo kick returners start: ");
+                //        var kickReturnersYahoo = doc.DocumentNode
+                //            .Descendants("a").ToArray();
+
+                //        for (var index = 0; index < kickReturnersYahoo.Count(); index++)
+                //        {
+                //            if (index == 0)
+                //            {
+                //                returner.YahooPrimaryKickReturner = kickReturnersYahoo[index].InnerText;
+                //            }
+
+                //            if (index == 1)
+                //            {
+                //                returner.YahooSecondaryKickReturner = kickReturnersYahoo[index].InnerText;
+                //            }
+
+                //            if (index == 2)
+                //            {
+                //                returner.YahooTertiaryKickReturner = kickReturnersYahoo[index].InnerText;
+                //            }
+                //        }
+
+                //        //Console.WriteLine("Yahoo Kick Returners Set: ");
+                //    }
+
+                //    doc = new HtmlDocument();
+                //    doc.LoadHtml(yahooHtml);
+                //    //Console.WriteLine("Yahoo punt Returner Start: ");
+                //    playersYahoo = doc.DocumentNode
+                //        .Descendants("li")
+                //        .Where(d =>
+                //                   d.Attributes.Contains("class")
+                //                   &&
+                //                   d.Attributes["class"].Value.Contains("punt-returner")
+                //              ).Single().InnerHtml;
+                //    //Console.WriteLine("Yahoo Punt Returner End: ");
+                //    doc = new HtmlDocument();
+                //    doc.LoadHtml(playersYahoo);
+
+                //    var puntReturnersYahoo = doc.DocumentNode
+                //        .Descendants("a").ToArray();
+
+                //    for (var index = 0; index < puntReturnersYahoo.Count(); index++)
+                //    {
+                //        if (index == 0)
+                //        {
+                //            returner.YahooPrimaryPuntReturner = puntReturnersYahoo[index].InnerText;
+                //        }
+
+                //        if (index == 1)
+                //        {
+                //            returner.YahooSecondaryPuntReturner = puntReturnersYahoo[index].InnerText;
+                //        }
+
+                //        if (index == 2)
+                //        {
+                //            returner.YahooTertiaryPuntReturner = puntReturnersYahoo[index].InnerText;
+                //        }
+                //    }
+                //    //Console.WriteLine("Yahoo punt returners set: ");
+
+                //    //Console.WriteLine(returner);
+                //    returners.Add(returner);
+                //    if (returners.Count % 5 == 0)
+                //    {
+                //        Console.WriteLine(returners.Count);
+                //    }
+                //}
             }
 
             //Console.WriteLine(returners);
