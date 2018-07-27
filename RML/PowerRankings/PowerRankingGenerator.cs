@@ -41,8 +41,6 @@ namespace RML.PowerRankings
                         else
                         {
                             var powerRanking = powerRankings.Single(p => p.TeamName == score.HomeTeam.TeamName);
-                            powerRanking.TeamName = score.HomeTeam.TeamName;
-                            powerRanking.TeamAbbreviation = score.HomeTeam.TeamAbbreviation;
                             powerRanking.PreviousTotal += score.HomeTeam.GetPointsForWeek;
                         }
 
@@ -58,8 +56,6 @@ namespace RML.PowerRankings
                         else
                         {
                             var powerRanking = powerRankings.Single(p => p.TeamName == score.AwayTeam.TeamName);
-                            powerRanking.TeamName = score.AwayTeam.TeamName;
-                            powerRanking.TeamAbbreviation = score.AwayTeam.TeamAbbreviation;
                             powerRanking.PreviousTotal += score.AwayTeam.GetPointsForWeek;
                         }
                     }
@@ -75,13 +71,36 @@ namespace RML.PowerRankings
                 {
                     foreach (var score in currentWeek.Scores)
                     {
+
                         //HomeTeam
-                        var powerRanking = powerRankings.Single(p => p.TeamName == score.HomeTeam.TeamName);
-                        powerRanking.CurrentTotal += score.HomeTeam.GetPointsForWeek;
+                        if (!powerRankings.Any(p => p.TeamName == score.HomeTeam.TeamName))
+                        {
+                            var powerRanking = new PowerRanking();
+                            powerRanking.TeamName = score.HomeTeam.TeamName;
+                            powerRanking.TeamAbbreviation = score.HomeTeam.TeamAbbreviation;
+                            powerRanking.CurrentTotal = score.HomeTeam.GetPointsForWeek;
+                            powerRankings.Add(powerRanking);
+                        }
+                        else
+                        {
+                            var powerRanking = powerRankings.Single(p => p.TeamName == score.HomeTeam.TeamName);
+                            powerRanking.CurrentTotal += score.HomeTeam.GetPointsForWeek;
+                        }
 
                         //AwayTeam
-                        powerRanking = powerRankings.Single(p => p.TeamName == score.AwayTeam.TeamName);
-                        powerRanking.CurrentTotal += score.AwayTeam.GetPointsForWeek;
+                        if (!powerRankings.Any(p => p.TeamName == score.AwayTeam.TeamName))
+                        {
+                            var powerRanking = new PowerRanking();
+                            powerRanking.TeamName = score.AwayTeam.TeamName;
+                            powerRanking.TeamAbbreviation = score.AwayTeam.TeamAbbreviation;
+                            powerRanking.CurrentTotal = score.AwayTeam.GetPointsForWeek;
+                            powerRankings.Add(powerRanking);
+                        }
+                        else
+                        {
+                            var powerRanking = powerRankings.Single(p => p.TeamName == score.AwayTeam.TeamName);
+                            powerRanking.CurrentTotal += score.AwayTeam.GetPointsForWeek;
+                        }
                     }
                 }
             }
