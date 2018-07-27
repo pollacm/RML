@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using RML.PowerRankings;
 
 namespace RML
 {
@@ -100,6 +101,8 @@ namespace RML
             {
                 scoresForPowerRankings[i] = GetScores(currentWeek - i, driver);
             }
+
+            var powerRankingGenerator = new PowerRankingGenerator(scoresForPowerRankings, currentWeek);
 
             var x = 1;
         }
