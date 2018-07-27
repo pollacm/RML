@@ -5,6 +5,7 @@ using System.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using RML.PowerRankings;
+using RML.Returners;
 
 namespace RML
 {
@@ -14,7 +15,13 @@ namespace RML
         private static int week = 2;
         static void Main(string[] args)
         {
+            ChromeOptions option = new ChromeOptions();
+            option.AddArgument("--headless");
+
             var driver = new ChromeDriver();
+
+            var returners = new Returners.Returners(driver);
+            returners.GenerateReturners();
 
             //login
 

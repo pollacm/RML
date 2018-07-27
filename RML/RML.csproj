@@ -57,7 +57,10 @@
     <Compile Include="PowerRankings\PowerRankingGenerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Returners.cs" />
+    <Compile Include="Returners\PrintReturnerService.cs" />
+    <Compile Include="Returners\Returner.cs" />
+    <Compile Include="Returners\Returners.cs" />
+    <Compile Include="Returners\SiteCode.cs" />
     <Compile Include="Score.cs" />
     <Compile Include="Team.cs" />
     <Compile Include="Week.cs" />
