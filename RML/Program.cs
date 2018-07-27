@@ -95,38 +95,42 @@ namespace RML
         private static void GetPowerRankings(ChromeDriver driver)
         {
             var currentWeek = week;
-            List<Score>[] scoresForPowerRankings = new List<Score>[4];
+            List<Week> weeksForPowerRankings = new List<Week>();
             //TODO: Get previous power ranking
+            //TODO: Need to account for weeks < 3
             for (int i = 3; i >= 0; i--)
             {
-                scoresForPowerRankings[i] = GetScores(currentWeek - i, driver);
+                weeksForPowerRankings.Add(GetWeek(currentWeek - i, driver));
             }
 
-            var powerRankingGenerator = new PowerRankingGenerator(scoresForPowerRankings, currentWeek);
-
+            var powerRankingGenerator = new PowerRankingGenerator(weeksForPowerRankings, currentWeek);
+            powerRankingGenerator.GeneratePowerRankings();
             var x = 1;
         }
 
-        private static List<Score> GetScores(int currentWeek, ChromeDriver driver)
+        private static Week GetWeek(int weekNumber, ChromeDriver driver)
         {
+            var week = new Week();
             var scores = new List<Score>();
-            
+
             driver.Navigate().GoToUrl($"http://games.espn.com/ffl/leagueoffice?leagueId=127291&seasonId={year}");
             driver.WaitUntilElementExists(By.ClassName("games-nav"));
 
-            driver.Navigate().GoToUrl($"http://games.espn.com/ffl/scoreboard?leagueId=127291&matchupPeriodId={currentWeek}");
+            driver.Navigate().GoToUrl($"http://games.espn.com/ffl/scoreboard?leagueId=127291&matchupPeriodId={weekNumber}");
             driver.WaitUntilElementExists(By.ClassName("ptsBased"));
 
             var matchups = driver.FindElements(By.XPath("//table[@class='ptsBased matchup']"));
             foreach (var matchup in matchups)
             {
-                scores.Add(BuildMatchup(matchup));
+                scores.Add(BuildScore(matchup));
             }
-            
-            return scores;
+            week.Scores = scores;
+            week.WeekNumber = weekNumber;
+
+            return week;
         }
 
-        private static Score BuildMatchup(IWebElement matchupElement)
+        private static Score BuildScore(IWebElement matchupElement)
         {
             var score = new Score();
             var teams = matchupElement.FindElements(By.XPath("./tbody//tr"));
@@ -136,12 +140,12 @@ namespace RML
                 if (awayTeam) //new score; build away
                 {
                     score = new Score();
-                    score.AwayTeam = BuildScore(team);
+                    score.AwayTeam = BuildTeam(team);
                     awayTeam = false;
                 }
                 else //build home team
                 {
-                    score.HomeTeam = BuildScore(team);
+                    score.HomeTeam = BuildTeam(team);
                     break;
                 }
             }
@@ -149,7 +153,7 @@ namespace RML
             return score;
         }
 
-        private static Team BuildScore(IWebElement teamElement)
+        private static Team BuildTeam(IWebElement teamElement)
         {
             var team = new Team();
 

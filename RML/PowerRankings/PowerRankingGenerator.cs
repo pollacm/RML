@@ -8,106 +8,106 @@ namespace RML.PowerRankings
 {
     public class PowerRankingGenerator
     {
-        private readonly List<Score>[] _scores;
+        private readonly List<Week> _weeks;
         private readonly int _currentWeek;
 
-        public PowerRankingGenerator(List<Score>[] scores, int currentWeek)
+        public PowerRankingGenerator(List<Week> weeks, int currentWeek)
         {
-            _scores = scores;
+            _weeks = weeks;
             _currentWeek = currentWeek;
         }
 
         public List<PowerRanking> GeneratePowerRankings()
         {
-            var currentPowerRankings = new Dictionary<string, PowerRanking>();
             var powerRankings = new List<PowerRanking>();
             //previous power rankings
-            for (int i = _currentWeek - 4; i < _currentWeek - 1; i++)
+            for (int week = _currentWeek - 1; week > _currentWeek - 4; week--)
             {
-                foreach (var score in _scores[i])
-                {
-                    //HomeTeam
-                    if (!currentPowerRankings.ContainsKey(score.HomeTeam.TeamName))
-                    {
-                        var powerRanking = new PowerRanking();
-                        powerRanking.TeamName = score.HomeTeam.TeamName;
-                        powerRanking.TeamAbbreviation = score.HomeTeam.TeamAbbreviation;
-                        powerRanking.PreviousTotal = score.HomeTeam.GetPointsForWeek;
-                        currentPowerRankings[score.HomeTeam.TeamName] = powerRanking;
-                    }
-                    else
-                    {
-                        var powerRanking = currentPowerRankings[score.HomeTeam.TeamName];
-                        powerRanking.TeamName = score.HomeTeam.TeamName;
-                        powerRanking.TeamAbbreviation = score.HomeTeam.TeamAbbreviation;
-                        powerRanking.PreviousTotal = score.HomeTeam.GetPointsForWeek;
-                        currentPowerRankings[score.HomeTeam.TeamName] = powerRanking;
-                    }
+                var currentWeek = _weeks.SingleOrDefault(w => w.WeekNumber == week);
 
-                    //AwayTeam
-                    if (!currentPowerRankings.ContainsKey(score.AwayTeam.TeamName))
+                if(currentWeek != null)
+                {
+                    foreach (var score in currentWeek.Scores)
                     {
-                        var powerRanking = new PowerRanking();
-                        powerRanking.TeamName = score.AwayTeam.TeamName;
-                        powerRanking.TeamAbbreviation = score.AwayTeam.TeamAbbreviation;
-                        powerRanking.PreviousTotal = score.AwayTeam.GetPointsForWeek;
-                        currentPowerRankings[score.AwayTeam.TeamName] = powerRanking;
+                        //HomeTeam
+                        if (!powerRankings.Any(p => p.TeamName == score.HomeTeam.TeamName))
+                        {
+                            var powerRanking = new PowerRanking();
+                            powerRanking.TeamName = score.HomeTeam.TeamName;
+                            powerRanking.TeamAbbreviation = score.HomeTeam.TeamAbbreviation;
+                            powerRanking.PreviousTotal = score.HomeTeam.GetPointsForWeek;
+                            powerRankings.Add(powerRanking);
+                        }
+                        else
+                        {
+                            var powerRanking = powerRankings.Single(p => p.TeamName == score.HomeTeam.TeamName);
+                            powerRanking.TeamName = score.HomeTeam.TeamName;
+                            powerRanking.TeamAbbreviation = score.HomeTeam.TeamAbbreviation;
+                            powerRanking.PreviousTotal += score.HomeTeam.GetPointsForWeek;
+                        }
+
+                        //AwayTeam
+                        if (!powerRankings.Any(p => p.TeamName == score.AwayTeam.TeamName))
+                        {
+                            var powerRanking = new PowerRanking();
+                            powerRanking.TeamName = score.AwayTeam.TeamName;
+                            powerRanking.TeamAbbreviation = score.AwayTeam.TeamAbbreviation;
+                            powerRanking.PreviousTotal = score.AwayTeam.GetPointsForWeek;
+                            powerRankings.Add(powerRanking);
+                        }
+                        else
+                        {
+                            var powerRanking = powerRankings.Single(p => p.TeamName == score.AwayTeam.TeamName);
+                            powerRanking.TeamName = score.AwayTeam.TeamName;
+                            powerRanking.TeamAbbreviation = score.AwayTeam.TeamAbbreviation;
+                            powerRanking.PreviousTotal += score.AwayTeam.GetPointsForWeek;
+                        }
                     }
-                    else
-                    {
-                        var powerRanking = currentPowerRankings[score.AwayTeam.TeamName];
-                        powerRanking.TeamName = score.AwayTeam.TeamName;
-                        powerRanking.TeamAbbreviation = score.AwayTeam.TeamAbbreviation;
-                        powerRanking.PreviousTotal += score.AwayTeam.GetPointsForWeek;
-                        currentPowerRankings[score.AwayTeam.TeamName] = powerRanking;
-                    }
-                }
+                }                
             }
 
             //current power rankings
-            for (int i = _currentWeek - 4; i < _currentWeek - 1; i++)
+            for (int week = _currentWeek; week > _currentWeek - 3; week--)
             {
-                foreach (var score in _scores[i])
-                {
-                    //HomeTeam
-                    var powerRanking = currentPowerRankings[score.HomeTeam.TeamName];
-                    powerRanking.CurrentTotal += score.HomeTeam.GetPointsForWeek;
-                    currentPowerRankings[score.HomeTeam.TeamName] = powerRanking;
+                var currentWeek = _weeks.SingleOrDefault(w => w.WeekNumber == week);
 
-                    //AwayTeam
-                    powerRanking = currentPowerRankings[score.AwayTeam.TeamName];
-                    powerRanking.CurrentTotal += score.AwayTeam.GetPointsForWeek;
-                    currentPowerRankings[score.AwayTeam.TeamName] = powerRanking;
+                if (currentWeek != null)
+                {
+                    foreach (var score in currentWeek.Scores)
+                    {
+                        //HomeTeam
+                        var powerRanking = powerRankings.Single(p => p.TeamName == score.HomeTeam.TeamName);
+                        powerRanking.CurrentTotal += score.HomeTeam.GetPointsForWeek;
+
+                        //AwayTeam
+                        powerRanking = powerRankings.Single(p => p.TeamName == score.AwayTeam.TeamName);
+                        powerRanking.CurrentTotal += score.AwayTeam.GetPointsForWeek;
+                    }
                 }
             }
 
-            var orderedPreviousTotalList = currentPowerRankings.OrderByDescending(p => p.Value.PreviousTotal);
             var point = 0m;
             var rank = 0;
-            foreach (var item in orderedPreviousTotalList)
+            foreach (var powerRanking in powerRankings.OrderByDescending(p => p.PreviousTotal))
             {
-                if(point != item.Value.PreviousTotal)
+                if(point != powerRanking.PreviousTotal)
                 {
                     rank++;                    
                 }
 
-                item.Value.PreviousPowerRanking = rank;
+                powerRanking.PreviousPowerRanking = rank;
             }
 
-            var orderedCurrentTotalList = currentPowerRankings.OrderByDescending(p => p.Value.CurrentTotal);
-            var rankedList = new PowerRanking();
             point = 0m;
             rank = 0;
-            foreach (var item in orderedCurrentTotalList)
+            foreach (var powerRanking in powerRankings.OrderByDescending(p => p.CurrentTotal))
             {
-                if (point != item.Value.CurrentTotal)
+                if (point != powerRanking.CurrentTotal)
                 {
                     rank++;
                 }
 
-                item.Value.CurrentPowerRanking = rank;
-                powerRankings.Add(item.Value);
-
+                powerRanking.CurrentPowerRanking = rank;
             }
 
             return powerRankings;
