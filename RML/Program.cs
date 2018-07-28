@@ -12,16 +12,15 @@ namespace RML
     class Program
     {
         private static string year = "2017";
-        private static int week = 2;
+        private static int week = 10;
         static void Main(string[] args)
         {
-            ChromeOptions option = new ChromeOptions();
-            option.AddArgument("--headless");
+            ChromeOptions options = new ChromeOptions();
+            //options.AddArgument("--headless");
+            var driver = new ChromeDriver(options);
 
-            var driver = new ChromeDriver();
-
-            var returners = new Returners.Returners(driver);
-            returners.GenerateReturners();
+            //var returners = new Returners.Returners(driver);
+            //returners.GenerateReturners();
 
             //login
 
@@ -36,19 +35,15 @@ namespace RML
             passwordBox.SendKeys("grip1334");
             passwordBox.SendKeys(Keys.Enter);
             System.Threading.Thread.Sleep(2000);
-            //var submitButton = driver.FindElement(By.XPath("//button[contains(., 'Log In')]"));
-            //submitButton.Click();
-
-
 
             //get teams
             var teamAnchors = driver.FindElements(By.CssSelector("div.games-fullcol table:nth-child(1) a"));
 
-            var teams = new List<string>();
-            foreach (var teamAnchor in teamAnchors)
-            {
-                teams.Add(teamAnchor.Text);
-            }
+            //var teams = new List<string>();
+            //foreach (var teamAnchor in teamAnchors)
+            //{
+            //    teams.Add(teamAnchor.Text);
+            //}
 
             driver.WaitUntilElementExists(By.CssSelector("table.tableBody"));
 
@@ -91,13 +86,24 @@ namespace RML
             
             var powerRankings = GetPowerRankings(driver);
             var currentWeek = GetWeek(week, driver);
-            CreateLeaguePage(powerRankings, teams, opOfTheWeek, dpOfTheWeek, currentWeek, week);
+
+            var weeklyPayoutTeams = string.Empty;
+            for(int i = 1; i <= week; i++)
+            {
+                var weekForWeeklyPayouts = GetWeek(i, driver);
+                var teamsForWeeklyPayouts = weekForWeeklyPayouts.Scores.Select(s => s.AwayTeam).ToList();
+                teamsForWeeklyPayouts.AddRange(weekForWeeklyPayouts.Scores.Select(s => s.HomeTeam));
+                weeklyPayoutTeams += (i + ". " + teamsForWeeklyPayouts.OrderByDescending(t => t.TeamPoints).First().TeamName.ToUpper() + @"
+                ");
+            }
+
+            CreateLeaguePage(powerRankings, weeklyPayoutTeams, opOfTheWeek, dpOfTheWeek, currentWeek, week);
             //TODO: Assign Trophies.. Need to prompt if it should happen
             AssignTrophies();
             var x = 1;
         }
-        //TODO: Need to figure out how to get weekly payouts
-        private static void CreateLeaguePage(List<PowerRanking> powerRankings, List<string> teams, PlayerOfTheWeek opOfTheWeek, PlayerOfTheWeek dpOfTheWeek, Week currentWeek, int i)
+
+        private static void CreateLeaguePage(List<PowerRanking> powerRankings, string weeklyPayoutTeams, PlayerOfTheWeek opOfTheWeek, PlayerOfTheWeek dpOfTheWeek, Week currentWeek, int i)
         {
             var leagueMessage = @"[b]<update> IN WEEK " + week + @"[/b]!!!!!
 
@@ -108,8 +114,6 @@ namespace RML
 <update>
 
 [b]WEEK " + week + @" RECAP[/b]
-
-<update>
 
 " + GetRecapInfo(currentWeek) + @"
 
@@ -154,18 +158,7 @@ namespace RML
 
   [b]WEEKLY PAYOUTS[/b]
   [b]
-  1.INVISIBLE JUICE
-  2.A - TOWN PLAYAZ
-  3.DOUBLE TROUBLE
-  4.A - TOWN PLAYAZ
-  5.DOUBLE TROUBLE
-  6.BAMA BLACKOUT
-  7.INVISIBLE JUICE
-  8.ZEKE'S SUPREME TEAM
-  9.INVISIBLE JUICE
-  10.ZEKE'S SUPREME TEAM
-  11.DOUBLE TROUBLE
-  12.DOUBLE TROUBLE
+  " + weeklyPayoutTeams + @"
   [/b]
 ";
         }

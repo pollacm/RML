@@ -36,6 +36,13 @@ namespace RML.Returners
         public string EspnSecondaryPuntReturner { get; set; }
         public string EspnTertiaryPuntReturner { get; set; }
 
+        //public string OurladsPrimaryKickReturner { get; set; }
+        //public string OurladsSecondaryKickReturner { get; set; }
+        //public string OurladsTertiaryKickReturner { get; set; }
+        //public string OurladsPrimaryPuntReturner { get; set; }
+        //public string OurladsSecondaryPuntReturner { get; set; }
+        //public string OurladsTertiaryPuntReturner { get; set; }
+
         public string Team { get; set; }
 
         //returner domain
@@ -48,21 +55,21 @@ namespace RML.Returners
         public bool InCommonPuntReturners => this.InCommonPrimaryPuntReturners && this.InCommonSecondaryPuntReturners && InCommonTertiaryPuntReturners;
 
         public bool InCommonPrimaryKickReturners => (YahooPrimaryKickReturner == null && EspnPrimaryKickReturner == null) ||
-                                                    (YahooPrimaryKickReturner != null && EspnPrimaryKickReturner != null && YahooPrimaryKickReturner.Contains(EspnPrimaryKickReturner.Split(' ').Last()));
+                                                    (YahooPrimaryKickReturner != null && EspnPrimaryKickReturner != null && YahooPrimaryKickReturner == EspnPrimaryKickReturner);
 
         public bool InCommonSecondaryKickReturners => (YahooSecondaryKickReturner == null && EspnSecondaryKickReturner == null) ||
-                                                      (YahooSecondaryKickReturner != null && EspnSecondaryKickReturner != null && YahooSecondaryKickReturner.Contains(EspnSecondaryKickReturner.Split(' ').Last()));
+                                                      (YahooSecondaryKickReturner != null && EspnSecondaryKickReturner != null && YahooSecondaryKickReturner == EspnSecondaryKickReturner);
 
         public bool InCommonTertiaryKickReturners => (YahooTertiaryKickReturner == null && EspnTertiaryKickReturner == null) ||
-                                                     (YahooTertiaryKickReturner != null && EspnTertiaryKickReturner != null && YahooTertiaryKickReturner.Contains(EspnTertiaryKickReturner.Split(' ').Last()));
+                                                     (YahooTertiaryKickReturner != null && EspnTertiaryKickReturner != null && YahooTertiaryKickReturner ==EspnTertiaryKickReturner);
 
         public bool InCommonPrimaryPuntReturners => (YahooPrimaryPuntReturner == null && EspnPrimaryPuntReturner == null) ||
-                                                    (YahooPrimaryPuntReturner != null && EspnPrimaryPuntReturner != null && YahooPrimaryPuntReturner.Contains(EspnPrimaryPuntReturner.Split(' ').Last()));
+                                                    (YahooPrimaryPuntReturner != null && EspnPrimaryPuntReturner != null && YahooPrimaryPuntReturner == EspnPrimaryPuntReturner);
 
         public bool InCommonSecondaryPuntReturners => (YahooSecondaryPuntReturner == null && EspnSecondaryPuntReturner == null) ||
-                                                      (YahooSecondaryPuntReturner != null && EspnSecondaryPuntReturner != null && YahooSecondaryPuntReturner.Contains(EspnSecondaryPuntReturner.Split(' ').Last()));
+                                                      (YahooSecondaryPuntReturner != null && EspnSecondaryPuntReturner != null && YahooSecondaryPuntReturner == EspnSecondaryPuntReturner);
 
         public bool InCommonTertiaryPuntReturners => (YahooTertiaryPuntReturner == null && EspnTertiaryPuntReturner == null) ||
-                                                     (YahooTertiaryPuntReturner != null && EspnTertiaryPuntReturner != null && YahooTertiaryPuntReturner.Contains(EspnTertiaryPuntReturner.Split(' ').Last()));
+                                                     (YahooTertiaryPuntReturner != null && EspnTertiaryPuntReturner != null && YahooTertiaryPuntReturner == EspnTertiaryPuntReturner);
     }
 }

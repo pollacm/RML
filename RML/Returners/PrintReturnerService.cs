@@ -7,7 +7,7 @@ namespace RML.Returners
     public class PrintReturnerService
     {
         private List<Returner> _returners;
-        private string returnerFile = @"E:\Dropbox\Private\Fantasy\Football\2018\ReturnersGenerated.txt";
+        private string returnerFile = @"E:\Dropbox\Private\Fantasy\RML\2018\ReturnersGenerated2.txt";
 
         public PrintReturnerService(List<Returner> returners)
         {

@@ -7,13 +7,13 @@
             this.TeamCode = teamCode;
             this.EspnCode = espnCode;
             this.YahooCode = yahooCode;
-            this.OurLadsCode = ourladsCode;
+            this.OurladsCode = ourladsCode;
         }
 
         public string TeamCode { get; set; }
         public string EspnCode { get; set; }
         public string YahooCode { get; set; }
-        public string OurLadsCode { get; set; }
+        public string OurladsCode { get; set; }
     }
 
 }
