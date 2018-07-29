@@ -63,6 +63,8 @@
     <Compile Include="Returners\SiteCode.cs" />
     <Compile Include="Score.cs" />
     <Compile Include="Team.cs" />
+    <Compile Include="Trophies\Trophies.cs" />
+    <Compile Include="Trophies\Trophy.cs" />
     <Compile Include="Week.cs" />
   </ItemGroup>
   <ItemGroup>

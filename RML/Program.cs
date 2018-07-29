@@ -208,6 +208,7 @@ namespace RML
 
         private static void AssignTrophies()
         {
+            //http://games.espn.com/ffl/trophylist?leagueId=127291
             throw new System.NotImplementedException();
         }
 
