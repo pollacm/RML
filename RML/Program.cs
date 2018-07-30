@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
 using RML.PowerRankings;
 using RML.Returners;
 
@@ -99,7 +100,7 @@ namespace RML
 
             CreateLeaguePage(powerRankings, weeklyPayoutTeams, opOfTheWeek, dpOfTheWeek, currentWeek, week);
             //TODO: Assign Trophies.. Need to prompt if it should happen
-            AssignTrophies();
+            AssignTrophies(currentWeek, driver);
             var x = 1;
         }
 
@@ -206,10 +207,40 @@ namespace RML
             return recapString;
         }
 
-        private static void AssignTrophies()
+        private static void AssignTrophies(Week currentWeek, ChromeDriver driver)
         {
             //http://games.espn.com/ffl/trophylist?leagueId=127291
+            var week =
+            Assign500ClubTrophies(currentWeek, driver);
             throw new System.NotImplementedException();
+        }
+
+        private static void Assign500ClubTrophies(Week currentWeek, ChromeDriver driver)
+        {
+            driver.Navigate().GoToUrl($"http://games.espn.com/ffl/trophylist?leagueId=127291");
+
+            var trophies = new Trophies.Trophies();
+            var winners = currentWeek.Scores.Where(s => s.AwayTeam.TeamPoints > 500).Select(s => s.AwayTeam).ToList();
+            winners.AddRange(currentWeek.Scores.Where(s => s.HomeTeam.TeamPoints > 500).Select(s => s.HomeTeam));
+
+            foreach (var team in winners.OrderByDescending(t => t.TeamPoints))
+            {
+                driver.FindElement(By.XPath("//table/tbody/tr/td/div/div/center/b[contains(.," + trophies.Da500Club + ")]/parent::center/parent::div/div/a[contains(.,'Assign')]")).Click();
+                driver.WaitUntilElementExists(By.Id("assignTrophyDiv"));
+
+                var dropdown = driver.FindElement(By.Id("assignTeamId"));
+                var dropdownSelect = new SelectElement(dropdown);
+                dropdownSelect.SelectByText(team.TeamName);
+
+                driver.FindElement(By.Name("headline")).SendKeys($"For putting up {team.TeamPoints} points!!!!!");
+
+                var showcase = driver.FindElement(By.Id("isShowcase"));
+                var showcaseDropdown = new SelectElement(showcase);
+                showcaseDropdown.SelectByText("Yes");
+
+                //driver.FindElement(By.Name("btnSubmit")).Click();
+                //driver.WaitUntilElementExists(By.ClassName("bodyCopy"));
+            }
         }
 
         private static List<PowerRanking> GetPowerRankings(ChromeDriver driver)
