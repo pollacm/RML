@@ -20,14 +20,14 @@ namespace RML.CornersAndSafeties
             _year = year;
         }
 
-        public List<Corner> BuildCorners()
+        public List<RmlCorner> BuildCorners()
         {
             _driver.Navigate().GoToUrl($"http://games.espn.com/ffl/freeagency?leagueId=127291&teamId=8&seasonId=2018#&seasonId={_year}");
             var opLink = _driver.FindElement(By.XPath("//ul[@class='filterToolsOptionSet']/li/a[contains(.,'CB')]"));
             opLink.Click();
 
             System.Threading.Thread.Sleep(2000);
-            var corners = new List<Corner>();
+            var corners = new List<RmlCorner>();
             var nextLink = _driver.FindElements(By.XPath("//div[@class='paginationNav']/a[contains(., 'NEXT')]"));
 
             while (nextLink.Count == 1)
@@ -37,7 +37,7 @@ namespace RML.CornersAndSafeties
 
                 foreach (var cornerRow in cornerRows)
                 {
-                    var corner = new Corner();
+                    var corner = new RmlCorner();
 
                     corner.Team = cornerRow.FindElement(By.XPath("./td[@class='playertablePlayerName']")).Text.Split(new string[] { ", " }, StringSplitOptions.None)[1].Split(' ')[0];
                     corner.Name = cornerRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).Text;

@@ -51,8 +51,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CornersAndSafeties\Corner.cs" />
+    <Compile Include="CornersAndSafeties\PrintSafetyService.cs" />
+    <Compile Include="CornersAndSafeties\SafetyComparer.cs" />
+    <Compile Include="CornersAndSafeties\SiteCorner.cs" />
+    <Compile Include="CornersAndSafeties\RmlCorner.cs" />
     <Compile Include="CornersAndSafeties\CornerBuilder.cs" />
+    <Compile Include="CornersAndSafeties\Corners.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="PlayerOfTheWeek.cs" />
     <Compile Include="PowerRankings\PowerRanking.cs" />
@@ -62,7 +66,7 @@
     <Compile Include="Returners\PrintReturnerService.cs" />
     <Compile Include="Returners\Returner.cs" />
     <Compile Include="Returners\Returners.cs" />
-    <Compile Include="Returners\SiteCode.cs" />
+    <Compile Include="SiteCode.cs" />
     <Compile Include="Score.cs" />
     <Compile Include="Team.cs" />
     <Compile Include="Trophies\Trophies.cs" />

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RML.CornersAndSafeties
 {
-    public class Corner
+    public class RmlCorner
     {
         public string Name { get; set; }
         public string Team { get; set; }

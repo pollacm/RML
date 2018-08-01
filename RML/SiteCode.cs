@@ -1,4 +1,4 @@
-﻿namespace RML.Returners
+﻿namespace RML
 {
     public class SiteCode
     {
