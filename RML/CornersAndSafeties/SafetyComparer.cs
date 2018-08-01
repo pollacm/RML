@@ -8,16 +8,18 @@ namespace RML.CornersAndSafeties
 {
     public class SafetyComparer
     {
-        private readonly List<RmlCorner> _corners;
+        private readonly List<SiteCorner> _siteCorners;
 
-        public SafetyComparer(List<RmlCorner> corners)
+        public SafetyComparer(List<SiteCorner> siteCorners)
         {
-            _corners = corners;
+            _siteCorners = siteCorners;
         }
 
-        public bool CornerInRmlIsSafety(SiteCorner siteCorner)
+        public RmlCorner CornerInRmlIsSafety(RmlCorner rmlCorner)
         {
-            return true;
+            var RmlCorner = rmlCorner;
+            //TODO: Add match, position, depthchart
+            return rmlCorner;
         }
     }
 }

@@ -11,11 +11,12 @@ namespace RML.CornersAndSafeties
         private readonly SafetyComparer _safetyComparer;
 
         private string returnerFile = @"E:\Dropbox\Private\Fantasy\RML\2018\SafetiesGenerated2.txt";
-        
+        private readonly List<RmlCorner> _rmlCorners;
+
         public PrintSafetyService(List<SiteCorner> siteCorners, List<RmlCorner> rmlCorners)
         {
-            _safetyComparer = new SafetyComparer(rmlCorners);
-            _siteCorners = siteCorners;
+            _safetyComparer = new SafetyComparer(siteCorners);
+            _rmlCorners = rmlCorners;
         }
 
         public void WriteSafetyFile()
@@ -24,9 +25,9 @@ namespace RML.CornersAndSafeties
             {
                 PrintHeader(file);
 
-                foreach (var siteCorner in _siteCorners)
+                foreach (var rmlCorner in _rmlCorners)
                 {
-                    PrintLine(file, siteCorner);
+                    PrintLine(file, rmlCorner);
                 }
             }
         }
@@ -50,22 +51,12 @@ namespace RML.CornersAndSafeties
                 file.Write("\t");
 
             //TODO: See if there's a safety marked as a corner
-            if (_safetyComparer.CornerInRmlIsSafety(rmlCorner))
+            if (_safetyComparer.CornerInRmlIsSafety(rmlCorner).Matches)
             {
                 file.Write("***\t\t");
             }
 
-            //"Player".Dump();
-            //returner.EspnPrimaryKickReturner.Dump();
-            //"Split Player".Dump();
-            //returner.EspnPrimaryKickReturner.Split(' ').Last().Dump();        
-            //"Is Set".Dump();
-            //returner.YahooPrimaryKickReturner.Contains(returner.EspnPrimaryKickReturner.Split(' ').Last()).Dump();
-            //"Is Set Real".Dump();
-            //returner.InCommonKickReturners.Dump();
-            //returner.Dump();
-
-            if (returner.InCommonAndSamePlayerPrimary)
+            if (_safetyComparer.CornerInRmlIsSafety(rmlCorner).Matches)
             {
                 file.Write("***");
             }

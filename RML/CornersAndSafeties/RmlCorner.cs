@@ -13,5 +13,21 @@ namespace RML.CornersAndSafeties
         public int PreviousRank { get; set; }
         public decimal PreviousPoints { get; set; }
         public decimal PreviousAverage { get; set; }
+        public PositionEnum Position { get; set; }
+        public DepthChartEnum DepthChart { get; set; }
+        public bool Matches { get; set; }
+
+        public enum PositionEnum
+        {
+            FR = 0,
+            SS = 1
+        }
+
+        public enum DepthChartEnum
+        {
+            Starter = 0,
+            Secondary = 1,
+            Tertiary = 2
+        }
     }
 }

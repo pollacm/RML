@@ -50,10 +50,12 @@ namespace RML.CornersAndSafeties
     };
 
     private readonly ChromeDriver _driver;
+    private readonly List<RmlCorner> _rmlCorners;
 
-    public Corners(ChromeDriver driver)
+    public Corners(ChromeDriver driver, List<RmlCorner> rmlCorners)
     {
         _driver = driver;
+        _rmlCorners = rmlCorners;
     }
 
     public void GenerateCorners()
@@ -73,57 +75,109 @@ namespace RML.CornersAndSafeties
                 var siteCorner = new SiteCorner();
                 siteCorner.Team = siteCode.TeamCode;
 
-                var yahooSafetyElement = _driver.FindElements(By.XPath("//div/h4[contains(.,'Kick Returner')]"));
-                if (yahooSafetyElement.Count == 1)
+                var yahooStrongSafetyElement = _driver.FindElements(By.XPath("//div/h4[contains(.,'Kick Returner')]"));
+                if (yahooStrongSafetyElement.Count == 1)
                 {
-                    var yahooSafeties = yahooSafetyElement[0].FindElements(By.XPath("./parent::div/ul/li/div/a"));
+                    var yahooSafeties = yahooStrongSafetyElement[0].FindElements(By.XPath("./parent::div/ul/li/div/a"));
 
-                    if (yahooSafetyElement.Count > 0)
+                    if (yahooSafeties.Count > 0)
                     {
-                        siteCorner.YahooPrimarySafety = yahooSafetyElement[0].Text;
+                        siteCorner.YahooPrimaryStrongSafety = yahooSafeties[0].Text;
                     }
-                    if (yahooSafetyElement.Count > 1)
+                    if (yahooSafeties.Count > 1)
                     {
-                        if (yahooSafetyElement[0].Text == string.Empty)
+                        if (yahooStrongSafetyElement[0].Text == string.Empty)
                         {
-                            siteCorner.YahooPrimarySafety = yahooSafetyElement[1].Text;
+                            siteCorner.YahooPrimaryStrongSafety = yahooSafeties[1].Text;
                         }
                         else
                         {
-                            siteCorner.YahooSecondarySafety = yahooSafetyElement[1].Text;
+                            siteCorner.YahooSecondaryStrongSafety = yahooSafeties[1].Text;
                         }
                     }
-                    if (yahooSafetyElement.Count > 2)
+                    if (yahooSafeties.Count > 2)
                     {
-                        siteCorner.YahooTertiarySafety = yahooSafetyElement[2].Text;
+                        siteCorner.YahooTertiaryStrongSafety = yahooSafeties[2].Text;
+                    }
+                }
+
+                var yahooFreeSafetyElement = _driver.FindElements(By.XPath("//div/h4[contains(.,'Kick Returner')]"));
+                if (yahooFreeSafetyElement.Count == 1)
+                {
+                    var yahooSafeties = yahooFreeSafetyElement[0].FindElements(By.XPath("./parent::div/ul/li/div/a"));
+
+                    if (yahooSafeties.Count > 0)
+                    {
+                        siteCorner.YahooPrimaryFreeSafety = yahooSafeties[0].Text;
+                    }
+                    if (yahooSafeties.Count > 1)
+                    {
+                        if (yahooFreeSafetyElement[0].Text == string.Empty)
+                        {
+                            siteCorner.YahooPrimaryFreeSafety = yahooSafeties[1].Text;
+                        }
+                        else
+                        {
+                            siteCorner.YahooSecondaryFreeSafety = yahooSafeties[1].Text;
+                        }
+                    }
+                    if (yahooSafeties.Count > 2)
+                    {
+                        siteCorner.YahooTertiaryFreeSafety = yahooSafeties[2].Text;
                     }
                 }
 
                 //espn
                 _driver.Navigate().GoToUrl(string.Format(espnUrlTemplate, siteCode.EspnCode));
-                var espnSafetyElement = _driver.FindElements(By.XPath("//table/tbody/tr/td[contains(.,'KR')]"));
-                if (espnSafetyElement.Count == 1)
+                var espnStrongSafetyElement = _driver.FindElements(By.XPath("//table/tbody/tr/td[contains(.,'KR')]"));
+                if (espnStrongSafetyElement.Count == 1)
                 {
-                    var espnSafties = espnSafetyElement[0].FindElements(By.XPath("./parent::tr/td"));
+                    var espnSafties = espnStrongSafetyElement[0].FindElements(By.XPath("./parent::tr/td"));
 
                     if (espnSafties.Count > 1)
                     {
-                        siteCorner.EspnPrimarySafety = espnSafties[1].Text;
+                        siteCorner.EspnPrimaryStrongSafety = espnSafties[1].Text;
                     }
                     if (espnSafties.Count > 2)
                     {
                         if (espnSafties[0].Text == string.Empty)
                         {
-                            siteCorner.EspnPrimarySafety = espnSafties[2].Text;
+                            siteCorner.EspnPrimaryStrongSafety = espnSafties[2].Text;
                         }
                         else
                         {
-                            siteCorner.EspnPrimarySafety = espnSafties[2].Text;
+                            siteCorner.EspnPrimaryStrongSafety = espnSafties[2].Text;
                         }
                     }
                     if (espnSafties.Count > 3)
                     {
-                        siteCorner.EspnTertiarySafety = espnSafties[3].Text;
+                        siteCorner.EspnTertiaryStrongSafety = espnSafties[3].Text;
+                    }
+                }
+
+                var espnFreeSafetyElement = _driver.FindElements(By.XPath("//table/tbody/tr/td[contains(.,'KR')]"));
+                if (espnFreeSafetyElement.Count == 1)
+                {
+                    var espnSafties = espnFreeSafetyElement[0].FindElements(By.XPath("./parent::tr/td"));
+
+                    if (espnSafties.Count > 1)
+                    {
+                        siteCorner.EspnPrimaryFreeSafety = espnSafties[1].Text;
+                    }
+                    if (espnSafties.Count > 2)
+                    {
+                        if (espnSafties[0].Text == string.Empty)
+                        {
+                            siteCorner.EspnPrimaryFreeSafety = espnSafties[2].Text;
+                        }
+                        else
+                        {
+                            siteCorner.EspnPrimaryFreeSafety = espnSafties[2].Text;
+                        }
+                    }
+                    if (espnSafties.Count > 3)
+                    {
+                        siteCorner.EspnTertiaryFreeSafety = espnSafties[3].Text;
                     }
                 }
 
@@ -193,7 +247,7 @@ namespace RML.CornersAndSafeties
 
             Console.WriteLine("Writing returner File:");
 
-            new PrintReturnerService(returners).WriteReturnerFile();
+            new PrintSafetyService(siteCorners, _rmlCorners).WriteSafetyFile();
             Console.WriteLine("Writing returner File COMPLETE");
         }
 

@@ -6,21 +6,33 @@ namespace RML.CornersAndSafeties
     {
         public SiteCorner()
         {
-            this.YahooPrimarySafety = string.Empty;
-            this.YahooSecondarySafety = string.Empty;
-            this.YahooTertiarySafety = string.Empty;
-            this.EspnPrimarySafety = string.Empty;
-            this.EspnSecondarySafety = string.Empty;
-            this.EspnTertiarySafety = string.Empty;
+            this.YahooPrimaryStrongSafety = string.Empty;
+            this.YahooSecondaryStrongSafety = string.Empty;
+            this.YahooTertiaryStrongSafety = string.Empty;
+            this.YahooPrimaryFreeSafety = string.Empty;
+            this.YahooSecondaryFreeSafety = string.Empty;
+            this.YahooTertiaryFreeSafety = string.Empty;
+            this.EspnPrimaryStrongSafety = string.Empty;
+            this.EspnSecondaryStrongSafety = string.Empty;
+            this.EspnTertiaryStrongSafety = string.Empty;
+            this.EspnPrimaryFreeSafety = string.Empty;
+            this.EspnSecondaryFreeSafety = string.Empty;
+            this.EspnTertiaryFreeSafety = string.Empty;
         }
 
-        public string YahooPrimarySafety { get; set; }
-        public string YahooSecondarySafety { get; set; }
-        public string YahooTertiarySafety { get; set; }
+        public string YahooPrimaryStrongSafety { get; set; }
+        public string YahooSecondaryStrongSafety { get; set; }
+        public string YahooTertiaryStrongSafety { get; set; }
+        public string YahooPrimaryFreeSafety { get; set; }
+        public string YahooSecondaryFreeSafety { get; set; }
+        public string YahooTertiaryFreeSafety { get; set; }
 
-        public string EspnPrimarySafety { get; set; }
-        public string EspnSecondarySafety { get; set; }
-        public string EspnTertiarySafety { get; set; }
+        public string EspnPrimaryStrongSafety { get; set; }
+        public string EspnSecondaryStrongSafety { get; set; }
+        public string EspnTertiaryStrongSafety { get; set; }
+        public string EspnPrimaryFreeSafety { get; set; }
+        public string EspnSecondaryFreeSafety { get; set; }
+        public string EspnTertiaryFreeSafety { get; set; }
 
         public string Team { get; set; }
 
