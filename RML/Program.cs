@@ -5,6 +5,7 @@ using System.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
+using RML.CornersAndSafeties;
 using RML.PowerRankings;
 using RML.Returners;
 
@@ -12,7 +13,7 @@ namespace RML
 {
     class Program
     {
-        private static string year = "2017";
+        private static int year = 2017;
         private static int week = 10;
         static void Main(string[] args)
         {
@@ -36,6 +37,10 @@ namespace RML
             passwordBox.SendKeys("grip1334");
             passwordBox.SendKeys(Keys.Enter);
             System.Threading.Thread.Sleep(2000);
+
+            //var cornerBuilder = new CornerBuilder(driver, year);
+            //var corners = cornerBuilder.BuildCorners();
+            //TODO: Need to validate this result with ESPN/YAHOO to get a difference and put that into the report.
 
             //get teams
             var teamAnchors = driver.FindElements(By.CssSelector("div.games-fullcol table:nth-child(1) a"));
@@ -210,9 +215,9 @@ namespace RML
         private static void AssignTrophies(Week currentWeek, ChromeDriver driver)
         {
             //http://games.espn.com/ffl/trophylist?leagueId=127291
-            var week =
-            Assign500ClubTrophies(currentWeek, driver);
-            throw new System.NotImplementedException();
+            //var week =
+            //Assign500ClubTrophies(currentWeek, driver);
+            //throw new System.NotImplementedException();
         }
 
         private static void Assign500ClubTrophies(Week currentWeek, ChromeDriver driver)

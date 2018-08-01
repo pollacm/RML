@@ -51,6 +51,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CornersAndSafeties\Corner.cs" />
+    <Compile Include="CornersAndSafeties\CornerBuilder.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="PlayerOfTheWeek.cs" />
     <Compile Include="PowerRankings\PowerRanking.cs" />
