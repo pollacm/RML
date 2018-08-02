@@ -69,13 +69,13 @@ namespace RML.CornersAndSafeties
             {
                 //yahoo
                 _driver.Navigate().GoToUrl(string.Format(yahooUrlTemplate, siteCode.YahooCode));
-                _driver.FindElement(By.XPath("//li[contains(.,'Specialists')]")).Click();
+                _driver.FindElement(By.XPath("//li[contains(.,'Defense')]")).Click();
                 System.Threading.Thread.Sleep(1000);
 
                 var siteCorner = new SiteCorner();
                 siteCorner.Team = siteCode.TeamCode;
 
-                var yahooStrongSafetyElement = _driver.FindElements(By.XPath("//div/h4[contains(.,'Kick Returner')]"));
+                var yahooStrongSafetyElement = _driver.FindElements(By.XPath("//div/h4[contains(.,'Strong Safety')]"));
                 if (yahooStrongSafetyElement.Count == 1)
                 {
                     var yahooSafeties = yahooStrongSafetyElement[0].FindElements(By.XPath("./parent::div/ul/li/div/a"));
@@ -101,7 +101,7 @@ namespace RML.CornersAndSafeties
                     }
                 }
 
-                var yahooFreeSafetyElement = _driver.FindElements(By.XPath("//div/h4[contains(.,'Kick Returner')]"));
+                var yahooFreeSafetyElement = _driver.FindElements(By.XPath("//div/h4[contains(.,'Free Safety')]"));
                 if (yahooFreeSafetyElement.Count == 1)
                 {
                     var yahooSafeties = yahooFreeSafetyElement[0].FindElements(By.XPath("./parent::div/ul/li/div/a"));
@@ -129,7 +129,11 @@ namespace RML.CornersAndSafeties
 
                 //espn
                 _driver.Navigate().GoToUrl(string.Format(espnUrlTemplate, siteCode.EspnCode));
-                var espnStrongSafetyElement = _driver.FindElements(By.XPath("//table/tbody/tr/td[contains(.,'KR')]"));
+
+                _driver.FindElement(By.XPath("//div[@id='my-teams-table']/div/ul/li[2]/a")).Click();
+                System.Threading.Thread.Sleep(1000);
+
+                var espnStrongSafetyElement = _driver.FindElements(By.XPath("//table/tbody/tr/td[contains(.,'SS')]"));
                 if (espnStrongSafetyElement.Count == 1)
                 {
                     var espnSafties = espnStrongSafetyElement[0].FindElements(By.XPath("./parent::tr/td"));
@@ -155,7 +159,7 @@ namespace RML.CornersAndSafeties
                     }
                 }
 
-                var espnFreeSafetyElement = _driver.FindElements(By.XPath("//table/tbody/tr/td[contains(.,'KR')]"));
+                var espnFreeSafetyElement = _driver.FindElements(By.XPath("//table/tbody/tr/td[contains(.,'FS')]"));
                 if (espnFreeSafetyElement.Count == 1)
                 {
                     var espnSafties = espnFreeSafetyElement[0].FindElements(By.XPath("./parent::tr/td"));

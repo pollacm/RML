@@ -36,19 +36,5 @@ namespace RML.CornersAndSafeties
 
         public string Team { get; set; }
 
-        //returner domain
-        public bool InCommonBothPrimary => this.InCommonPrimarySafeties;
-
-        public bool InCommonSafties => this.InCommonPrimarySafeties && this.InCommonSecondaryKickReturners && InCommonTertiaryKickReturners;
-        
-        public bool InCommonPrimarySafeties => (YahooPrimarySafety == null && EspnPrimarySafety == null) ||
-                                                    (YahooPrimarySafety != null && EspnPrimarySafety != null && YahooPrimarySafety == EspnPrimarySafety);
-
-        public bool InCommonSecondaryKickReturners => (YahooSecondarySafety == null && EspnSecondarySafety == null) ||
-                                                      (YahooSecondarySafety != null && EspnSecondarySafety != null && YahooSecondarySafety == EspnSecondarySafety);
-
-        public bool InCommonTertiaryKickReturners => (YahooTertiarySafety == null && EspnTertiarySafety == null) ||
-                                                     (YahooTertiarySafety != null && EspnTertiarySafety != null && YahooTertiarySafety ==EspnTertiarySafety);
-
     }
 }

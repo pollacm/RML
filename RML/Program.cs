@@ -38,9 +38,9 @@ namespace RML
             passwordBox.SendKeys(Keys.Enter);
             System.Threading.Thread.Sleep(2000);
 
-            //var cornerBuilder = new CornerBuilder(driver, year);
-            //var corners = cornerBuilder.BuildCorners();
-            //TODO: Need to validate this result with ESPN/YAHOO to get a difference and put that into the report.
+            var cornerBuilder = new CornerBuilder(driver, year);
+            var rmlCorners = cornerBuilder.BuildCorners();
+            new Corners(driver, rmlCorners).GenerateCorners();
 
             //get teams
             var teamAnchors = driver.FindElements(By.CssSelector("div.games-fullcol table:nth-child(1) a"));

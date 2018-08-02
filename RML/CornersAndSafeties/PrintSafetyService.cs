@@ -17,6 +17,7 @@ namespace RML.CornersAndSafeties
         {
             _safetyComparer = new SafetyComparer(siteCorners);
             _rmlCorners = rmlCorners;
+            _siteCorners = siteCorners;
         }
 
         public void WriteSafetyFile()
@@ -24,51 +25,61 @@ namespace RML.CornersAndSafeties
             using (StreamWriter file = new StreamWriter(returnerFile))
             {
                 PrintHeader(file);
-
                 foreach (var rmlCorner in _rmlCorners)
                 {
-                    PrintLine(file, rmlCorner);
+                    if (_siteCorners.Any(c => c.EspnPrimaryFreeSafety == rmlCorner.Name || c.EspnPrimaryStrongSafety == rmlCorner.Name ||
+                                              c.EspnSecondaryFreeSafety == rmlCorner.Name || c.EspnSecondaryStrongSafety == rmlCorner.Name ||
+                                              c.EspnTertiaryFreeSafety == rmlCorner.Name || c.EspnTertiaryStrongSafety == rmlCorner.Name ||
+                                              c.YahooPrimaryFreeSafety == rmlCorner.Name || c.YahooPrimaryStrongSafety == rmlCorner.Name ||
+                                              c.YahooSecondaryFreeSafety == rmlCorner.Name || c.YahooSecondaryStrongSafety == rmlCorner.Name ||
+                                              c.YahooTertiaryFreeSafety == rmlCorner.Name || c.YahooTertiaryStrongSafety == rmlCorner.Name))
+                    {
+                        var siteCorner = _safetyComparer.CornerInRmlIsSafety(rmlCorner);
+                        if (siteCorner != null)
+                        {
+                            PrintLine(file, rmlCorner, siteCorner);
+                        }
+                    }
+                    //var siteCorner = _siteCorners.First();
+                    //PrintLine(file, rmlCorner, siteCorner);
                 }
             }
         }
 
-        private void PrintLine(StreamWriter file, RmlCorner rmlCorner)
+        private void PrintLine(StreamWriter file, RmlCorner rmlCorner, SiteCorner siteCorner)
         {
             file.Write(rmlCorner.Team);
-            for (int i = 0; i < (6 - (int)(rmlCorner.Team.ToArray().Count() / 4)); i++)
+            for (int i = 0; i < (4 - (int)(rmlCorner.Team.ToArray().Count() / 4)); i++)
                 file.Write("\t");
 
             file.Write(rmlCorner.Name);
-            for (int i = 0; i < (6 - (int)(rmlCorner.Name.ToArray().Count() / 4)); i++)
+            for (int i = 0; i < (7 - (int)(rmlCorner.Name.ToArray().Count() / 4)); i++)
+                file.Write("\t");
+
+            RmlCorner.PositionEnum position = _safetyComparer.GetPosition(rmlCorner, siteCorner);
+            file.Write(position);
+            for (int i = 0; i < (3 - (int)(position.ToString().ToArray().Count() / 4)); i++)
+                file.Write("\t");
+
+            RmlCorner.DepthChartEnum depthChart = _safetyComparer.GetDepthChartSpot(rmlCorner, siteCorner);
+            file.Write(depthChart);
+            for (int i = 0; i < (3 - (int)(depthChart.ToString().ToArray().Count() / 4)); i++)
                 file.Write("\t");
 
             file.Write(rmlCorner.PreviousRank);
-            for (int i = 0; i < (8 - (int)(rmlCorner.PreviousRank.ToString().ToArray().Count() / 4)); i++)
+            for (int i = 0; i < (3 - (int)(rmlCorner.PreviousRank.ToString().ToArray().Count() / 4)); i++)
                 file.Write("\t");
 
             file.Write(rmlCorner.PreviousAverage);
             for (int i = 0; i < (8 - (int)(rmlCorner.PreviousAverage.ToString().ToArray().Count() / 4)); i++)
                 file.Write("\t");
 
-            //TODO: See if there's a safety marked as a corner
-            if (_safetyComparer.CornerInRmlIsSafety(rmlCorner).Matches)
-            {
-                file.Write("***\t\t");
-            }
-
-            if (_safetyComparer.CornerInRmlIsSafety(rmlCorner).Matches)
-            {
-                file.Write("***");
-            }
-
             file.WriteLine();
         }
 
         private void PrintHeader(StreamWriter file)
         {
-            file.WriteLine("\t\t\t\t\t\tYahoo\t\t\t\t\t\t\t\t\t\t\t\t\tESPN");
-            file.WriteLine("TEAM\t\t\t\t\tKR\t\t\t\t\t\tPR\t\t\t\t\t\t\t\tKR\t\t\t\t\t\t\t\tPR");
-            file.WriteLine("\t\t\t\t\t\t--------------------\t-------------------------\t\t------------------------------\t-------------------------");
+            file.WriteLine("TEAM\t\t\tNAME\t\t\t\t\t\tPOSITION\tDEPTH\t\tRANK\t\tPOINTS");
         }
     }
 }
