@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RML.CornersAndSafeties
+﻿namespace RML.PlayerComparer
 {
-    public class RmlCorner
+    public class RmlPlayer
     {
         public string Name { get; set; }
         public string Team { get; set; }

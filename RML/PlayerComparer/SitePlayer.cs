@@ -1,10 +1,8 @@
-﻿using System.Linq;
-
-namespace RML.CornersAndSafeties
+﻿namespace RML.PlayerComparer
 {
-    public class SiteCorner
+    public class SitePlayer
     {
-        public SiteCorner()
+        public SitePlayer()
         {
             this.YahooPrimaryStrongSafety = string.Empty;
             this.YahooSecondaryStrongSafety = string.Empty;

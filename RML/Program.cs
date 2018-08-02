@@ -5,7 +5,7 @@ using System.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
-using RML.CornersAndSafeties;
+using RML.PlayerComparer;
 using RML.PowerRankings;
 using RML.Returners;
 
@@ -38,9 +38,9 @@ namespace RML
             passwordBox.SendKeys(Keys.Enter);
             System.Threading.Thread.Sleep(2000);
 
-            var cornerBuilder = new CornerBuilder(driver, year);
-            var rmlCorners = cornerBuilder.BuildCorners();
-            new Corners(driver, rmlCorners).GenerateCorners();
+            var rmlPlayerBuilder = new RmlPlayerBuilder(driver, year);
+            var rmlPlayers = rmlPlayerBuilder.BuildRmlPlayers();
+            new PlayerComparer.PlayerComparer(driver, rmlPlayers).ComparePlayers();
 
             //get teams
             var teamAnchors = driver.FindElements(By.CssSelector("div.games-fullcol table:nth-child(1) a"));

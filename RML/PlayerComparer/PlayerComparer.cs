@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using RML.Returners;
 
-namespace RML.CornersAndSafeties
+namespace RML.PlayerComparer
 {
-    public class Corners
+    public class PlayerComparer
 {
     readonly List<SiteCode> siteCodes = new List<SiteCode>
     {
@@ -50,17 +47,17 @@ namespace RML.CornersAndSafeties
     };
 
     private readonly ChromeDriver _driver;
-    private readonly List<RmlCorner> _rmlCorners;
+    private readonly List<RmlPlayer> _rmlPlayers;
 
-    public Corners(ChromeDriver driver, List<RmlCorner> rmlCorners)
+    public PlayerComparer(ChromeDriver driver, List<RmlPlayer> rmlPlayers)
     {
         _driver = driver;
-        _rmlCorners = rmlCorners;
+        _rmlPlayers = rmlPlayers;
     }
 
-    public void GenerateCorners()
+    public void ComparePlayers()
     {
-            var siteCorners = new List<SiteCorner>();
+            var sitePlayers = new List<SitePlayer>();
             var espnUrlTemplate = "http://www.espn.com/nfl/team/depth/_/name/{0}/formation/special-teams";
             var yahooUrlTemplate = "https://sports.yahoo.com/nfl/teams/{0}/roster/";
             var ourladsUrlTemplate = "http://www.ourlads.com/nfldepthcharts/depthchart/{0}";
@@ -72,8 +69,8 @@ namespace RML.CornersAndSafeties
                 _driver.FindElement(By.XPath("//li[contains(.,'Defense')]")).Click();
                 System.Threading.Thread.Sleep(1000);
 
-                var siteCorner = new SiteCorner();
-                siteCorner.Team = siteCode.TeamCode;
+                var sitePlayer = new SitePlayer();
+                sitePlayer.Team = siteCode.TeamCode;
 
                 var yahooStrongSafetyElement = _driver.FindElements(By.XPath("//div/h4[contains(.,'Strong Safety')]"));
                 if (yahooStrongSafetyElement.Count == 1)
@@ -82,22 +79,22 @@ namespace RML.CornersAndSafeties
 
                     if (yahooSafeties.Count > 0)
                     {
-                        siteCorner.YahooPrimaryStrongSafety = yahooSafeties[0].Text;
+                        sitePlayer.YahooPrimaryStrongSafety = yahooSafeties[0].Text;
                     }
                     if (yahooSafeties.Count > 1)
                     {
                         if (yahooStrongSafetyElement[0].Text == string.Empty)
                         {
-                            siteCorner.YahooPrimaryStrongSafety = yahooSafeties[1].Text;
+                            sitePlayer.YahooPrimaryStrongSafety = yahooSafeties[1].Text;
                         }
                         else
                         {
-                            siteCorner.YahooSecondaryStrongSafety = yahooSafeties[1].Text;
+                            sitePlayer.YahooSecondaryStrongSafety = yahooSafeties[1].Text;
                         }
                     }
                     if (yahooSafeties.Count > 2)
                     {
-                        siteCorner.YahooTertiaryStrongSafety = yahooSafeties[2].Text;
+                        sitePlayer.YahooTertiaryStrongSafety = yahooSafeties[2].Text;
                     }
                 }
 
@@ -108,22 +105,22 @@ namespace RML.CornersAndSafeties
 
                     if (yahooSafeties.Count > 0)
                     {
-                        siteCorner.YahooPrimaryFreeSafety = yahooSafeties[0].Text;
+                        sitePlayer.YahooPrimaryFreeSafety = yahooSafeties[0].Text;
                     }
                     if (yahooSafeties.Count > 1)
                     {
                         if (yahooFreeSafetyElement[0].Text == string.Empty)
                         {
-                            siteCorner.YahooPrimaryFreeSafety = yahooSafeties[1].Text;
+                            sitePlayer.YahooPrimaryFreeSafety = yahooSafeties[1].Text;
                         }
                         else
                         {
-                            siteCorner.YahooSecondaryFreeSafety = yahooSafeties[1].Text;
+                            sitePlayer.YahooSecondaryFreeSafety = yahooSafeties[1].Text;
                         }
                     }
                     if (yahooSafeties.Count > 2)
                     {
-                        siteCorner.YahooTertiaryFreeSafety = yahooSafeties[2].Text;
+                        sitePlayer.YahooTertiaryFreeSafety = yahooSafeties[2].Text;
                     }
                 }
 
@@ -140,22 +137,22 @@ namespace RML.CornersAndSafeties
 
                     if (espnSafties.Count > 1)
                     {
-                        siteCorner.EspnPrimaryStrongSafety = espnSafties[1].Text;
+                        sitePlayer.EspnPrimaryStrongSafety = espnSafties[1].Text;
                     }
                     if (espnSafties.Count > 2)
                     {
                         if (espnSafties[0].Text == string.Empty)
                         {
-                            siteCorner.EspnPrimaryStrongSafety = espnSafties[2].Text;
+                            sitePlayer.EspnPrimaryStrongSafety = espnSafties[2].Text;
                         }
                         else
                         {
-                            siteCorner.EspnPrimaryStrongSafety = espnSafties[2].Text;
+                            sitePlayer.EspnPrimaryStrongSafety = espnSafties[2].Text;
                         }
                     }
                     if (espnSafties.Count > 3)
                     {
-                        siteCorner.EspnTertiaryStrongSafety = espnSafties[3].Text;
+                        sitePlayer.EspnTertiaryStrongSafety = espnSafties[3].Text;
                     }
                 }
 
@@ -166,22 +163,22 @@ namespace RML.CornersAndSafeties
 
                     if (espnSafties.Count > 1)
                     {
-                        siteCorner.EspnPrimaryFreeSafety = espnSafties[1].Text;
+                        sitePlayer.EspnPrimaryFreeSafety = espnSafties[1].Text;
                     }
                     if (espnSafties.Count > 2)
                     {
                         if (espnSafties[0].Text == string.Empty)
                         {
-                            siteCorner.EspnPrimaryFreeSafety = espnSafties[2].Text;
+                            sitePlayer.EspnPrimaryFreeSafety = espnSafties[2].Text;
                         }
                         else
                         {
-                            siteCorner.EspnPrimaryFreeSafety = espnSafties[2].Text;
+                            sitePlayer.EspnPrimaryFreeSafety = espnSafties[2].Text;
                         }
                     }
                     if (espnSafties.Count > 3)
                     {
-                        siteCorner.EspnTertiaryFreeSafety = espnSafties[3].Text;
+                        sitePlayer.EspnTertiaryFreeSafety = espnSafties[3].Text;
                     }
                 }
 
@@ -235,7 +232,7 @@ namespace RML.CornersAndSafeties
                 //    }
                 //}
 
-                siteCorners.Add(siteCorner);
+                sitePlayers.Add(sitePlayer);
 
                 count++;
 
@@ -251,7 +248,7 @@ namespace RML.CornersAndSafeties
 
             Console.WriteLine("Writing returner File:");
 
-            new PrintSafetyService(siteCorners, _rmlCorners).WriteSafetyFile();
+            new PrintPlayerComparerService(sitePlayers, _rmlPlayers).WritePlayerComparerFile();
             Console.WriteLine("Writing returner File COMPLETE");
         }
 
