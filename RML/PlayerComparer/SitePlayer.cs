@@ -33,6 +33,13 @@
         public string EspnTertiaryFreeSafety { get; set; }
 
         public string Team { get; set; }
+        public string Name { get; set; }
+
+
+        public enum PositionEnum
+        {
+
+        }
 
     }
 }

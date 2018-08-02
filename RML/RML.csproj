@@ -54,7 +54,7 @@
     <Compile Include="PlayerComparer\PrintPlayerComparerService.cs" />
     <Compile Include="PlayerComparer\PlayerComparerHelper.cs" />
     <Compile Include="PlayerComparer\SitePlayer.cs" />
-    <Compile Include="PlayerComparer\RmlCorner.cs" />
+    <Compile Include="PlayerComparer\RmlPlayer.cs" />
     <Compile Include="PlayerComparer\RmlPlayerBuilder.cs" />
     <Compile Include="PlayerComparer\PlayerComparer.cs" />
     <Compile Include="Extensions.cs" />
