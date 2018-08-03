@@ -18,36 +18,57 @@ namespace RML.PlayerComparer
 
         public List<RmlPlayer> BuildRmlPlayers()
         {
-            _driver.Navigate().GoToUrl($"http://games.espn.com/ffl/freeagency?leagueId=127291&teamId=8&seasonId=2018#&seasonId={_year}");
-            var opLink = _driver.FindElement(By.XPath("//ul[@class='filterToolsOptionSet']/li/a[contains(.,'CB')]"));
-            opLink.Click();
-
-            System.Threading.Thread.Sleep(2000);
-            var rmlPlayers = new List<RmlPlayer>();
-            var nextLink = _driver.FindElements(By.XPath("//div[@class='paginationNav']/a[contains(., 'NEXT')]"));
-
-            while (nextLink.Count == 1)
+            var playerTypes = new List<string>
             {
-                nextLink = _driver.FindElements(By.XPath("//div[@class='paginationNav']/a[contains(., 'NEXT')]"));
-                var rmlPlayerRows = _driver.FindElements(By.XPath("//tr[contains(@class, 'pncPlayerRow')]"));
+                "CB",
+                "LB"
+            };
 
-                foreach (var rmlPlayerRow in rmlPlayerRows)
+            var rmlPlayers = new List<RmlPlayer>();
+            foreach (var playerType in playerTypes)
+            {
+                _driver.Navigate().GoToUrl($"http://games.espn.com/ffl/freeagency?leagueId=127291&teamId=8&seasonId=2018#&seasonId={_year}");
+                var opLink = _driver.FindElement(By.XPath($"//ul[@class='filterToolsOptionSet']/li/a[contains(.,'{playerType}')]"));
+                opLink.Click();
+
+                System.Threading.Thread.Sleep(2000);
+                var nextLink = _driver.FindElements(By.XPath("//div[@class='paginationNav']/a[contains(., 'NEXT')]"));
+
+                while (nextLink.Count == 1)
                 {
-                    var rmlPlayer = new RmlPlayer();
+                    nextLink = _driver.FindElements(By.XPath("//div[@class='paginationNav']/a[contains(., 'NEXT')]"));
+                    var rmlPlayerRows = _driver.FindElements(By.XPath("//tr[contains(@class, 'pncPlayerRow')]"));
 
-                    rmlPlayer.Team = rmlPlayerRow.FindElement(By.XPath("./td[@class='playertablePlayerName']")).Text.Split(new string[] { ", " }, StringSplitOptions.None)[1].Split(' ')[0];
-                    rmlPlayer.Name = rmlPlayerRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).Text;
-                    rmlPlayer.PreviousRank = int.Parse(rmlPlayerRow.FindElement(By.XPath("./td[@class='playertableData'][1]")).Text);
-                    rmlPlayer.PreviousPoints = decimal.Parse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][1]")).Text);
-                    rmlPlayer.PreviousAverage = decimal.Parse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][2]")).Text);
+                    foreach (var rmlPlayerRow in rmlPlayerRows)
+                    {
+                        var rmlPlayer = new RmlPlayer();
 
-                    rmlPlayers.Add(rmlPlayer);
-                }
+                        try
+                        {
+                            rmlPlayer.Team = rmlPlayerRow.FindElement(By.XPath("./td[@class='playertablePlayerName']")).Text.Split(new string[] { ", " }, StringSplitOptions.None)[1].Split(' ')[0];
+                            rmlPlayer.Name = rmlPlayerRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).Text;
+                            rmlPlayer.PreviousRank = int.Parse(rmlPlayerRow.FindElement(By.XPath("./td[@class='playertableData'][1]")).Text);
+                            rmlPlayer.PreviousPoints = decimal.Parse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][1]")).Text);
+                            rmlPlayer.PreviousAverage = decimal.Parse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][2]")).Text);
+                        }
+                        catch
+                        {
+                            System.Threading.Thread.Sleep(30000);
+                            rmlPlayer.Team = rmlPlayerRow.FindElement(By.XPath("./td[@class='playertablePlayerName']")).Text.Split(new string[] { ", " }, StringSplitOptions.None)[1].Split(' ')[0];
+                            rmlPlayer.Name = rmlPlayerRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).Text;
+                            rmlPlayer.PreviousRank = int.Parse(rmlPlayerRow.FindElement(By.XPath("./td[@class='playertableData'][1]")).Text);
+                            rmlPlayer.PreviousPoints = decimal.Parse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][1]")).Text);
+                            rmlPlayer.PreviousAverage = decimal.Parse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][2]")).Text);
+                        }
 
-                if (nextLink.Count == 1)
-                {
-                    nextLink[0].Click();
-                    System.Threading.Thread.Sleep(2000);
+                        rmlPlayers.Add(rmlPlayer);
+                    }
+
+                    if (nextLink.Count == 1)
+                    {
+                        nextLink[0].Click();
+                        System.Threading.Thread.Sleep(2000);
+                    }
                 }
             }
 
