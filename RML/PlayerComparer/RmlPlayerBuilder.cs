@@ -42,7 +42,7 @@ namespace RML.PlayerComparer
                     foreach (var rmlPlayerRow in rmlPlayerRows)
                     {
                         var rmlPlayer = new RmlPlayer();
-
+                        //TODO: Need to check if the first Position is the one we are looking for (i.e. S, CB => CB)
                         try
                         {
                             rmlPlayer.Team = rmlPlayerRow.FindElement(By.XPath("./td[@class='playertablePlayerName']")).Text.Split(new string[] { ", " }, StringSplitOptions.None)[1].Split(' ')[0];
