@@ -20,5 +20,17 @@ namespace RML
                 throw;
             }
         }
+
+        public static void NavigateToUrl(this ChromeDriver driver, string url)
+        {
+            try
+            {
+                driver.Navigate().GoToUrl(url);
+            }
+            catch (WebDriverTimeoutException e)
+            {
+                // Ignore the exception.  
+            }
+        }
     }
 }

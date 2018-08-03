@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
 using RML.PlayerComparer;
 using RML.PowerRankings;
@@ -38,6 +39,7 @@ namespace RML
             passwordBox.SendKeys(Keys.Enter);
             System.Threading.Thread.Sleep(2000);
 
+            driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 0, 5);
             var rmlPlayerBuilder = new RmlPlayerBuilder(driver, year);
             var rmlPlayers = rmlPlayerBuilder.BuildRmlPlayers();
             new PlayerComparer.PlayerComparer(driver, rmlPlayers).ComparePlayers();

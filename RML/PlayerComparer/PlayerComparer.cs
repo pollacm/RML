@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
@@ -65,117 +66,70 @@ namespace RML.PlayerComparer
             foreach (var siteCode in siteCodes)
             {
                 //yahoo
-                _driver.Navigate().GoToUrl(string.Format(yahooUrlTemplate, siteCode.YahooCode));
+                _driver.NavigateToUrl(string.Format(yahooUrlTemplate, siteCode.YahooCode));
                 _driver.FindElement(By.XPath("//li[contains(.,'Defense')]")).Click();
-                System.Threading.Thread.Sleep(1000);
+                _driver.WaitUntilElementExists(By.XPath($"//div/h4[contains(.,'Free Safety')]"));
 
-                var yahooStrongSafetyElement = _driver.FindElements(By.XPath("//div/h4[contains(.,'Strong Safety')]"));
-                if (yahooStrongSafetyElement.Count == 1)
+                foreach (var linebackerPositionsYahoo in PlayerConstants.LinebackerPositionsYahoo)
                 {
-                    var yahooSafeties = yahooStrongSafetyElement[0].FindElements(By.XPath("./parent::div/ul/li/div/a"));
+                    var yahooStrongSafetyElement = _driver.FindElements(By.XPath($"//div/h4[contains(.,'{linebackerPositionsYahoo.Key}')]"));
+                    //var test = sitePlayers.Where(s => s.Team == "Dallas Cowboys").ToList();
+                    if (yahooStrongSafetyElement.Count == 1)
+                    {
+                        var yahooSafeties = yahooStrongSafetyElement[0].FindElements(By.XPath("./parent::div/ul/li/div/a"));
 
-                    if (yahooSafeties.Count > 0)
-                    {
-                        sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Starter, SitePlayer.PositionEnum.SS, SitePlayer.SiteEnum.Yahoo, yahooSafeties[0].Text));
-                    }
-                    if (yahooSafeties.Count > 1)
-                    {
-                        if (yahooStrongSafetyElement[0].Text == string.Empty)
+                        if (yahooSafeties.Count > 0)
                         {
-                            sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Starter, SitePlayer.PositionEnum.SS, SitePlayer.SiteEnum.Yahoo, yahooSafeties[1].Text));
+                            sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Starter, linebackerPositionsYahoo.Value, SitePlayer.SiteEnum.Yahoo, yahooSafeties[0].Text));
                         }
-                        else
+                        if (yahooSafeties.Count > 1)
                         {
-                            sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Secondary, SitePlayer.PositionEnum.SS, SitePlayer.SiteEnum.Yahoo, yahooSafeties[1].Text));
+                            if (yahooStrongSafetyElement[0].Text == string.Empty)
+                            {
+                                sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Starter, linebackerPositionsYahoo.Value, SitePlayer.SiteEnum.Yahoo, yahooSafeties[1].Text));
+                            }
+                            else
+                            {
+                                sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Secondary, linebackerPositionsYahoo.Value, SitePlayer.SiteEnum.Yahoo, yahooSafeties[1].Text));
+                            }
                         }
-                    }
-                    if (yahooSafeties.Count > 2)
-                    {
-                        sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Tertiary, SitePlayer.PositionEnum.SS, SitePlayer.SiteEnum.Yahoo, yahooSafeties[2].Text));
+                        if (yahooSafeties.Count > 2)
+                        {
+                            sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Tertiary, linebackerPositionsYahoo.Value, SitePlayer.SiteEnum.Yahoo, yahooSafeties[2].Text));
+                        }
                     }
                 }
 
-                var yahooFreeSafetyElement = _driver.FindElements(By.XPath("//div/h4[contains(.,'Free Safety')]"));
-                if (yahooFreeSafetyElement.Count == 1)
-                {
-                    var yahooSafeties = yahooFreeSafetyElement[0].FindElements(By.XPath("./parent::div/ul/li/div/a"));
-
-                    if (yahooSafeties.Count > 0)
-                    {
-                        sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Starter, SitePlayer.PositionEnum.FS, SitePlayer.SiteEnum.Yahoo, yahooSafeties[0].Text));
-                    }
-                    if (yahooSafeties.Count > 1)
-                    {
-                        if (yahooFreeSafetyElement[0].Text == string.Empty)
-                        {
-                            sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Starter, SitePlayer.PositionEnum.FS, SitePlayer.SiteEnum.Yahoo, yahooSafeties[1].Text));
-                        }
-                        else
-                        {
-                            sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Secondary, SitePlayer.PositionEnum.FS, SitePlayer.SiteEnum.Yahoo, yahooSafeties[1].Text));
-                        }
-                    }
-                    if (yahooSafeties.Count > 2)
-                    {
-                        sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Tertiary, SitePlayer.PositionEnum.FS, SitePlayer.SiteEnum.Yahoo, yahooSafeties[2].Text));
-                    }
-                }
-
-                //espn
-                _driver.Navigate().GoToUrl(string.Format(espnUrlTemplate, siteCode.EspnCode));
-
+                _driver.NavigateToUrl(string.Format(espnUrlTemplate, siteCode.EspnCode));
                 _driver.FindElement(By.XPath("//div[@id='my-teams-table']/div/ul/li[2]/a")).Click();
-                System.Threading.Thread.Sleep(1000);
+                _driver.WaitUntilElementExists(By.XPath($"//table/tbody/tr/td[contains(.,'SS')]"));
 
-                var espnStrongSafetyElement = _driver.FindElements(By.XPath("//table/tbody/tr/td[contains(.,'SS')]"));
-                if (espnStrongSafetyElement.Count == 1)
+                foreach (var linebackerPositionsEspn in PlayerConstants.LinebackerPositionsEspn)
                 {
-                    var espnSafties = espnStrongSafetyElement[0].FindElements(By.XPath("./parent::tr/td"));
+                    var espnStrongSafetyElement = _driver.FindElements(By.XPath($"//table/tbody/tr/td[contains(.,'{linebackerPositionsEspn.Key}')]"));
+                    if (espnStrongSafetyElement.Count == 1)
+                    {
+                        var espnSafties = espnStrongSafetyElement[0].FindElements(By.XPath("./parent::tr/td"));
 
-                    if (espnSafties.Count > 1)
-                    {
-                        sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Starter, SitePlayer.PositionEnum.SS, SitePlayer.SiteEnum.ESPN, espnSafties[1].Text));
-                    }
-                    if (espnSafties.Count > 2)
-                    {
-                        if (espnSafties[0].Text == string.Empty)
+                        if (espnSafties.Count > 1)
                         {
-                            sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Starter, SitePlayer.PositionEnum.SS, SitePlayer.SiteEnum.ESPN, espnSafties[2].Text));
+                            sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Starter, linebackerPositionsEspn.Value, SitePlayer.SiteEnum.ESPN, espnSafties[1].Text));
                         }
-                        else
+                        if (espnSafties.Count > 2)
                         {
-                            sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Secondary, SitePlayer.PositionEnum.SS, SitePlayer.SiteEnum.ESPN, espnSafties[2].Text));
+                            if (espnSafties[0].Text == string.Empty)
+                            {
+                                sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Starter, linebackerPositionsEspn.Value, SitePlayer.SiteEnum.ESPN, espnSafties[2].Text));
+                            }
+                            else
+                            {
+                                sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Secondary, linebackerPositionsEspn.Value, SitePlayer.SiteEnum.ESPN, espnSafties[2].Text));
+                            }
                         }
-                    }
-                    if (espnSafties.Count > 3)
-                    {
-                        sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Tertiary, SitePlayer.PositionEnum.SS, SitePlayer.SiteEnum.ESPN, espnSafties[3].Text));
-                    }
-                }
-
-                var espnFreeSafetyElement = _driver.FindElements(By.XPath("//table/tbody/tr/td[contains(.,'FS')]"));
-                if (espnFreeSafetyElement.Count == 1)
-                {
-                    var espnSafties = espnFreeSafetyElement[0].FindElements(By.XPath("./parent::tr/td"));
-
-                    if (espnSafties.Count > 1)
-                    {
-                        sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Starter, SitePlayer.PositionEnum.FS, SitePlayer.SiteEnum.ESPN, espnSafties[1].Text));
-                    }
-                    if (espnSafties.Count > 2)
-                    {
-                        if (espnSafties[0].Text == string.Empty)
+                        if (espnSafties.Count > 3)
                         {
-                            sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Starter, SitePlayer.PositionEnum.FS, SitePlayer.SiteEnum.ESPN, espnSafties[2].Text));
+                            sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Tertiary, linebackerPositionsEspn.Value, SitePlayer.SiteEnum.ESPN, espnSafties[3].Text));
                         }
-                        else
-                        {
-                            sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Secondary, SitePlayer.PositionEnum.FS, SitePlayer.SiteEnum.ESPN, espnSafties[2].Text));
-                        }
-                    }
-                    if (espnSafties.Count > 3)
-                    {
-                        sitePlayers.Add(new SitePlayer(siteCode.TeamCode, PlayerConstants.DepthChartEnum.Tertiary, SitePlayer.PositionEnum.FS, SitePlayer.SiteEnum.ESPN, espnSafties[3].Text));
                     }
                 }
 
@@ -243,7 +197,7 @@ namespace RML.PlayerComparer
 
             Console.WriteLine("Writing returner File:");
 
-            new PrintPlayerComparerService(sitePlayers, _rmlPlayers).WritePlayerComparerFile();
+            new PrintPlayerComparerService(sitePlayers.OrderBy(p => p.Name).ToList(), _rmlPlayers).WritePlayerComparerFile();
             Console.WriteLine("Writing returner File COMPLETE");
         }
 

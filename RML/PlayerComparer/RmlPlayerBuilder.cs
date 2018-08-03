@@ -21,13 +21,13 @@ namespace RML.PlayerComparer
             var playerTypes = new List<string>
             {
                 "CB",
-                "LB"
+                "DL"
             };
 
             var rmlPlayers = new List<RmlPlayer>();
             foreach (var playerType in playerTypes)
             {
-                _driver.Navigate().GoToUrl($"http://games.espn.com/ffl/freeagency?leagueId=127291&teamId=8&seasonId=2018#&seasonId={_year}");
+                _driver.Navigate().GoToUrl($"http://games.espn.com/ffl/freeagency?leagueId=127291&teamId=8&seasonId={_year}");
                 var opLink = _driver.FindElement(By.XPath($"//ul[@class='filterToolsOptionSet']/li/a[contains(.,'{playerType}')]"));
                 opLink.Click();
 
@@ -43,6 +43,7 @@ namespace RML.PlayerComparer
                     {
                         var rmlPlayer = new RmlPlayer();
                         //TODO: Need to check if the first Position is the one we are looking for (i.e. S, CB => CB)
+                        //Chandler Jones, Ari LB, DE, EDR
                         try
                         {
                             rmlPlayer.Team = rmlPlayerRow.FindElement(By.XPath("./td[@class='playertablePlayerName']")).Text.Split(new string[] { ", " }, StringSplitOptions.None)[1].Split(' ')[0];

@@ -8,7 +8,7 @@ namespace RML.PlayerComparer
     {
         private readonly List<SitePlayer> _sitePlayers;
 
-        private string returnerFile = @"E:\Dropbox\Private\Fantasy\RML\2018\PlayerComparerGenerated.txt";
+        private string returnerFile = @"C:\Users\cxp6696\Dropbox\Private\Fantasy\RML\2018\PlayerComparerGenerated2.txt";
         private readonly List<RmlPlayer> _rmlPlayers;
 
         public PrintPlayerComparerService(List<SitePlayer> sitePlayers, List<RmlPlayer> rmlPlayers)
@@ -22,12 +22,12 @@ namespace RML.PlayerComparer
             using (StreamWriter file = new StreamWriter(returnerFile))
             {
                 PrintHeader(file);
-                foreach (var rmlPlayer in _rmlPlayers)
+                foreach (var sitePlayer in _sitePlayers)
                 {
-                    var sitePlayers = _sitePlayers.Where(c => c.Name == rmlPlayer.Name);
-                    if (sitePlayers.Any())
+                    var rmlPlayers = _rmlPlayers.Where(p => p.Name == sitePlayer.Name).ToList();
+                    if (rmlPlayers.Any())
                     {
-                        foreach (var sitePlayer in sitePlayers)
+                        foreach (var rmlPlayer in rmlPlayers)
                         {
                             PrintLine(file, rmlPlayer, sitePlayer);
                         }
@@ -63,7 +63,25 @@ namespace RML.PlayerComparer
                 file.Write("\t");
 
             file.Write(rmlPlayer.PreviousAverage);
-            for (int i = 0; i < (8 - (int)(rmlPlayer.PreviousAverage.ToString().ToArray().Count() / 4)); i++)
+            for (int i = 0; i < (3 - (int)(rmlPlayer.PreviousAverage.ToString().ToArray().Count() / 4)); i++)
+                file.Write("\t");
+
+            var espnPlayer = _sitePlayers.Any(p => p.Name == rmlPlayer.Name && p.Site == SitePlayer.SiteEnum.ESPN);
+            var espnPlayerDisplay = espnPlayer ? "**" : "";
+
+            file.Write(espnPlayerDisplay);
+            for (int i = 0; i < (3 - (int)(espnPlayerDisplay.ToString().ToArray().Count() / 4)); i++)
+                file.Write("\t");
+
+            var yahooPlayer = _sitePlayers.Any(p => p.Name == rmlPlayer.Name && p.Site == SitePlayer.SiteEnum.Yahoo);
+            var yahooPlayerDisplay = yahooPlayer ? "**" : "";
+            file.Write(yahooPlayerDisplay);
+            for (int i = 0; i < (3 - (int)(yahooPlayerDisplay.ToString().ToArray().Count() / 4)); i++)
+                file.Write("\t");
+
+            var inBothSites = espnPlayer && yahooPlayer ? "****" : "";
+            file.Write(inBothSites);
+            for (int i = 0; i < (3 - (int)(inBothSites.ToString().ToArray().Count() / 4)); i++)
                 file.Write("\t");
 
             file.WriteLine();
@@ -71,7 +89,7 @@ namespace RML.PlayerComparer
 
         private void PrintHeader(StreamWriter file)
         {
-            file.WriteLine("TEAM\t\t\tNAME\t\t\t\t\t\tPOSITION\tDEPTH\t\tSITE\t\tRANK\t\tPOINTS");
+            file.WriteLine("TEAM\t\t\tNAME\t\t\t\t\t\tPOSITION\tDEPTH\t\tSITE\t\tRANK\t\tPOINTS\t\tESPN\t\tYAHOO\t\tBOTH");
         }
     }
 }
