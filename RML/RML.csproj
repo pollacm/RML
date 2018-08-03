@@ -51,6 +51,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PlayerComparer\PlayerConstants.cs" />
     <Compile Include="PlayerComparer\PrintPlayerComparerService.cs" />
     <Compile Include="PlayerComparer\PlayerComparerHelper.cs" />
     <Compile Include="PlayerComparer\SitePlayer.cs" />
