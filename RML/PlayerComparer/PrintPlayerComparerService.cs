@@ -46,8 +46,8 @@ namespace RML.PlayerComparer
             for (int i = 0; i < (7 - (int)(rmlPlayer.Name.ToArray().Count() / 4)); i++)
                 file.Write("\t");
 
-            file.Write(rmlPlayer.Position);
-            for (int i = 0; i < (3 - (int)(rmlPlayer.Position.ToString().ToArray().Count() / 4)); i++)
+            file.Write(sitePlayer.Position);
+            for (int i = 0; i < (3 - (int)(sitePlayer.Position.ToString().ToArray().Count() / 4)); i++)
                 file.Write("\t");
 
             file.Write(sitePlayer.DepthChart);
