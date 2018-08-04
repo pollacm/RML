@@ -9,6 +9,8 @@ using OpenQA.Selenium.Support.UI;
 using RML.PlayerComparer;
 using RML.PowerRankings;
 using RML.Returners;
+using RML.RmlPlayer;
+using RML.SitePlayer;
 
 namespace RML
 {
@@ -32,17 +34,32 @@ namespace RML
             var userNameBox = driver.FindElement(By.CssSelector("div.field-username-email input"));
             userNameBox.SendKeys(Keys.ArrowDown);
             userNameBox.SendKeys("pollacm@gmail.com");
-            
+
             var passwordBox = driver.FindElement(By.CssSelector("div.field-password input"));
             passwordBox.SendKeys(Keys.ArrowDown);
             passwordBox.SendKeys("grip1334");
             passwordBox.SendKeys(Keys.Enter);
             System.Threading.Thread.Sleep(2000);
 
-            driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 0, 5);
-            var rmlPlayerBuilder = new RmlPlayerBuilder(driver, year);
-            var rmlPlayers = rmlPlayerBuilder.BuildRmlPlayers();
-            new PlayerComparer.PlayerComparer(driver, rmlPlayers).ComparePlayers();
+            //driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 0, 5);
+
+            //var rmlPlayerBuilder = new RmlPlayerBuilder(driver, 2018);
+            //var rmlPlayers = rmlPlayerBuilder.BuildRmlPlayers();
+            var rmlPlayerRepository = new RmlPlayerRepository();
+            //rmlPlayerRepository.RefreshRmlPlayers(rmlPlayers);
+            var rmlPlayers = rmlPlayerRepository.GetRmlPlayers();
+
+            //var sitePlayerBuilder = new SitePlayerBuilder(driver);
+            //var sitePlayers = sitePlayerBuilder.BuildSitePlayers();
+            var sitePlayerRepository = new SitePlayerRepository();
+            //sitePlayerRepository.RefreshSitePlayers(sitePlayers);
+            var sitePlayers = sitePlayerRepository.GetSitePlayers();
+
+            Console.WriteLine("Writing returner File:");
+            new PrintPlayerComparerService(sitePlayers.OrderBy(p => p.Name).ToList(), rmlPlayers).WritePlayerComparerFile();
+            Console.WriteLine("Writing returner File COMPLETE");
+
+
 
             //get teams
             var teamAnchors = driver.FindElements(By.CssSelector("div.games-fullcol table:nth-child(1) a"));

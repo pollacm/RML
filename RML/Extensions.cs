@@ -29,6 +29,7 @@ namespace RML
             }
             catch (WebDriverTimeoutException e)
             {
+                NavigateToUrl(driver, url);
                 // Ignore the exception.  
             }
         }

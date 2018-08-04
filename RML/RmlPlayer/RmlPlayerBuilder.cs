@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
-namespace RML.PlayerComparer
+namespace RML.RmlPlayer
 {
     public class RmlPlayerBuilder
     {
@@ -48,18 +48,26 @@ namespace RML.PlayerComparer
                         {
                             rmlPlayer.Team = rmlPlayerRow.FindElement(By.XPath("./td[@class='playertablePlayerName']")).Text.Split(new string[] { ", " }, StringSplitOptions.None)[1].Split(' ')[0];
                             rmlPlayer.Name = rmlPlayerRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).Text;
-                            rmlPlayer.PreviousRank = int.Parse(rmlPlayerRow.FindElement(By.XPath("./td[@class='playertableData'][1]")).Text);
-                            rmlPlayer.PreviousPoints = decimal.Parse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][1]")).Text);
-                            rmlPlayer.PreviousAverage = decimal.Parse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][2]")).Text);
+                            rmlPlayer.PreviousRank = int.TryParse(rmlPlayerRow.FindElement(By.XPath("./td[@class='playertableData'][1]")).Text, out _) ?
+                                int.Parse(rmlPlayerRow.FindElement(By.XPath("./td[@class='playertableData'][1]")).Text) : -1;
+                            rmlPlayer.PreviousPoints = decimal.TryParse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][1]")).Text, out _) ?
+                                decimal.Parse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][1]")).Text) : -10;
+                            rmlPlayer.PreviousAverage = decimal.TryParse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][2]")).Text, out _) ?
+                                decimal.Parse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][2]")).Text) : -10;
+                            rmlPlayer.Positions = ParsePositionFromElement(rmlPlayerRow.FindElement(By.XPath("./td[@class='playertablePlayerName']")).Text, rmlPlayer.Name.Length);
                         }
                         catch
                         {
                             System.Threading.Thread.Sleep(30000);
                             rmlPlayer.Team = rmlPlayerRow.FindElement(By.XPath("./td[@class='playertablePlayerName']")).Text.Split(new string[] { ", " }, StringSplitOptions.None)[1].Split(' ')[0];
                             rmlPlayer.Name = rmlPlayerRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).Text;
-                            rmlPlayer.PreviousRank = int.Parse(rmlPlayerRow.FindElement(By.XPath("./td[@class='playertableData'][1]")).Text);
-                            rmlPlayer.PreviousPoints = decimal.Parse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][1]")).Text);
-                            rmlPlayer.PreviousAverage = decimal.Parse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][2]")).Text);
+                            rmlPlayer.PreviousRank = int.TryParse(rmlPlayerRow.FindElement(By.XPath("./td[@class='playertableData'][1]")).Text, out _) ?
+                                int.Parse(rmlPlayerRow.FindElement(By.XPath("./td[@class='playertableData'][1]")).Text) : -1;
+                            rmlPlayer.PreviousPoints = decimal.TryParse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][1]")).Text, out _) ?
+                                decimal.Parse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][1]")).Text) : -10;
+                            rmlPlayer.PreviousAverage = decimal.TryParse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][2]")).Text, out _) ?
+                                decimal.Parse(rmlPlayerRow.FindElement(By.XPath("./td[contains(@class,'playertableStat')][2]")).Text) : -10;
+                            rmlPlayer.Positions = ParsePositionFromElement(rmlPlayerRow.FindElement(By.XPath("./td[@class='playertablePlayerName']")).Text, rmlPlayer.Name.Length);
                         }
 
                         rmlPlayers.Add(rmlPlayer);
@@ -68,12 +76,21 @@ namespace RML.PlayerComparer
                     if (nextLink.Count == 1)
                     {
                         nextLink[0].Click();
-                        System.Threading.Thread.Sleep(2000);
+                        System.Threading.Thread.Sleep(5000);
                     }
                 }
             }
 
             return rmlPlayers;
+        }
+
+        private string ParsePositionFromElement(string text, int lengthOfName)
+        {
+            var teamAndPositions = text.Substring(lengthOfName, text.Length - lengthOfName).Substring(2);
+            var indexOfTeam = teamAndPositions.IndexOf(' ');
+            var positions = teamAndPositions.Substring(indexOfTeam, teamAndPositions.Length - indexOfTeam).Substring(1);
+
+            return positions;
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace RML.PlayerComparer
+﻿using RML.PlayerComparer;
+
+namespace RML.SitePlayer
 {
     public class SitePlayer
     {

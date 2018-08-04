@@ -1,4 +1,4 @@
-﻿namespace RML
+﻿namespace RML.SiteCodes
 {
     public class SiteCode
     {

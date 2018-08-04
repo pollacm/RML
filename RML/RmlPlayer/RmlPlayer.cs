@@ -1,4 +1,4 @@
-﻿namespace RML.PlayerComparer
+﻿namespace RML.RmlPlayer
 {
     public class RmlPlayer
     {
@@ -7,5 +7,6 @@
         public int PreviousRank { get; set; }
         public decimal PreviousPoints { get; set; }
         public decimal PreviousAverage { get; set; }
+        public string Positions { get; set; }
     }
 }
