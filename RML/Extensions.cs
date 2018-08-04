@@ -27,9 +27,9 @@ namespace RML
             {
                 driver.Navigate().GoToUrl(url);
             }
-            catch (WebDriverTimeoutException e)
+            catch (Exception e)
             {
-                NavigateToUrl(driver, url);
+                //NavigateToUrl(driver, url);
                 // Ignore the exception.  
             }
         }

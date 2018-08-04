@@ -70,7 +70,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Returners\PrintReturnerService.cs" />
     <Compile Include="Returners\Returner.cs" />
-    <Compile Include="Returners\Returners.cs" />
+    <Compile Include="Returners\ReturnerBuilder.cs" />
     <Compile Include="RmlPlayer\RmlPlayerRepository.cs" />
     <Compile Include="SiteCodes\SiteCode.cs" />
     <Compile Include="Score.cs" />
