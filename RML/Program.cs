@@ -10,6 +10,7 @@ using RML.PowerRankings;
 using RML.Returners;
 using RML.RmlPlayer;
 using RML.SitePlayer;
+using RML.Weeks;
 
 namespace RML
 {
@@ -24,7 +25,7 @@ namespace RML
             //options.AddArgument("--headless");
             var driver = new ChromeDriver(options);
 
-            new ReturnerBuilder(driver).GenerateReturners();
+            //new ReturnerBuilder(driver).GenerateReturners();
 
             //login
 
@@ -109,13 +110,14 @@ namespace RML
             dpOfTheWeek.PlayerId = int.Parse(dpRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).GetAttribute("playerid"));
             dpOfTheWeek.Points = decimal.Parse(dpRow.FindElement(By.XPath("./td[contains(@class, 'sortedCell')]")).Text);
 
-            var powerRankings = GetPowerRankings(driver);
-            var currentWeek = GetWeek(week, driver);
+            var weekRepository = new WeekRepository();
+            var powerRankings = GetPowerRankings(driver, weekRepository);
+            var currentWeek = weekRepository.GetWeek(driver, week, year);
 
             var weeklyPayoutTeams = string.Empty;
             for (var i = 1; i <= week; i++)
             {
-                var weekForWeeklyPayouts = GetWeek(i, driver);
+                var weekForWeeklyPayouts = weekRepository.GetWeek(driver, i, year);
                 var teamsForWeeklyPayouts = weekForWeeklyPayouts.Scores.Select(s => s.AwayTeam).ToList();
                 teamsForWeeklyPayouts.AddRange(weekForWeeklyPayouts.Scores.Select(s => s.HomeTeam));
                 weeklyPayoutTeams += i + ". " + teamsForWeeklyPayouts.OrderByDescending(t => t.TeamPoints).First().TeamName.ToUpper() + @"
@@ -265,70 +267,17 @@ namespace RML
             }
         }
 
-        private static List<PowerRanking> GetPowerRankings(ChromeDriver driver)
+        private static List<PowerRanking> GetPowerRankings(ChromeDriver driver, WeekRepository weekRepository)
         {
             var currentWeek = week;
             var weeksForPowerRankings = new List<Week>();
             
             for (var i = 3; i >= 0; i--)
                 if (currentWeek - i > 0)
-                    weeksForPowerRankings.Add(GetWeek(currentWeek - i, driver));
+                    weeksForPowerRankings.Add(weekRepository.GetWeek(driver, currentWeek - i, year));
 
             var powerRankingGenerator = new PowerRankingGenerator(weeksForPowerRankings, currentWeek);
             return powerRankingGenerator.GeneratePowerRankings();
-        }
-
-        private static Week GetWeek(int weekNumber, ChromeDriver driver)
-        {
-            var week = new Week();
-            var scores = new List<Score>();
-
-            driver.Navigate().GoToUrl($"http://games.espn.com/ffl/leagueoffice?leagueId=127291&seasonId={year}");
-            driver.WaitUntilElementExists(By.ClassName("games-nav"));
-
-            driver.Navigate().GoToUrl($"http://games.espn.com/ffl/scoreboard?leagueId=127291&matchupPeriodId={weekNumber}");
-            driver.WaitUntilElementExists(By.ClassName("ptsBased"));
-
-            var matchups = driver.FindElements(By.XPath("//table[@class='ptsBased matchup']"));
-            foreach (var matchup in matchups)
-                scores.Add(BuildScore(matchup));
-            week.Scores = scores;
-            week.WeekNumber = weekNumber;
-
-            return week;
-        }
-
-        private static Score BuildScore(IWebElement matchupElement)
-        {
-            var score = new Score();
-            var teams = matchupElement.FindElements(By.XPath("./tbody//tr"));
-            var awayTeam = true;
-            foreach (var team in teams)
-                if (awayTeam) //new score; build away
-                {
-                    score = new Score();
-                    score.AwayTeam = BuildTeam(team);
-                    awayTeam = false;
-                }
-                else //build home team
-                {
-                    score.HomeTeam = BuildTeam(team);
-                    break;
-                }
-
-            return score;
-        }
-
-        private static Team BuildTeam(IWebElement teamElement)
-        {
-            var team = new Team();
-
-            team.TeamName = teamElement.FindElement(By.XPath("./td[@class='team']/div[@class='name']/a")).Text;
-            team.TeamAbbreviation = teamElement.FindElement(By.XPath("./td[@class='team']/div[@class='name']/span")).Text.Replace("(", "").Replace(")", "");
-            team.TeamPoints = decimal.Parse(teamElement.FindElement(By.XPath("./td[contains(@class, 'score')]")).Text);
-            team.Win = teamElement.FindElements(By.XPath("./td[2][contains(@class, 'winning')]")).Any();
-
-            return team;
         }
     }
 }
