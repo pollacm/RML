@@ -44,28 +44,31 @@ namespace RML
 
             //var rmlPlayerBuilder = new RmlPlayerBuilder(driver, 2018);
             //var rmlPlayers = rmlPlayerBuilder.BuildRmlPlayers();
-            var rmlPlayerRepository = new RmlPlayerRepository();
             //rmlPlayerRepository.RefreshRmlPlayers(rmlPlayers);
-            var rmlPlayers = rmlPlayerRepository.GetRmlPlayers();
+
+            //var rmlPlayerRepository = new RmlPlayerRepository();
+            //var rmlPlayers = rmlPlayerRepository.GetRmlPlayers();
 
             //var sitePlayerBuilder = new SitePlayerBuilder(driver);
             //var sitePlayers = sitePlayerBuilder.BuildSitePlayers();
-            var sitePlayerRepository = new SitePlayerRepository();
             //sitePlayerRepository.RefreshSitePlayers(sitePlayers);
-            var sitePlayers = sitePlayerRepository.GetSitePlayers();
 
-            Console.WriteLine("Writing returner File:");
-            new PrintPlayerComparerService(sitePlayers.OrderBy(p => p.Name).ToList(), rmlPlayers).WritePlayerComparerFile();
-            Console.WriteLine("Writing returner File COMPLETE");
+            //var sitePlayerRepository = new SitePlayerRepository();
+            //var sitePlayers = sitePlayerRepository.GetSitePlayers();
+
+            //Console.WriteLine("Writing returner File:");
+            //new PrintPlayerComparerService(sitePlayers.OrderBy(p => p.Name).ToList(), rmlPlayers).WritePlayerComparerFile();
+            //Console.WriteLine("Writing returner File COMPLETE");
 
             //get teams
+            driver.Navigate().GoToUrl($"http://games.espn.com/ffl/standings?leagueId=127291&seasonId={year}");
             var teamAnchors = driver.FindElements(By.CssSelector("div.games-fullcol table:nth-child(1) a"));
 
-            //var teams = new List<string>();
-            //foreach (var teamAnchor in teamAnchors)
-            //{
-            //    teams.Add(teamAnchor.Text);
-            //}
+            var teams = new List<string>();
+            foreach (var teamAnchor in teamAnchors)
+            {
+                teams.Add(teamAnchor.Text);
+            }
 
             driver.WaitUntilElementExists(By.CssSelector("table.tableBody"));
 
@@ -266,8 +269,7 @@ namespace RML
         {
             var currentWeek = week;
             var weeksForPowerRankings = new List<Week>();
-            //TODO: Get previous power ranking
-            //TODO: Need to account for weeks < 3
+            
             for (var i = 3; i >= 0; i--)
                 if (currentWeek - i > 0)
                     weeksForPowerRankings.Add(GetWeek(currentWeek - i, driver));
