@@ -73,9 +73,11 @@
     <Compile Include="Returners\ReturnerBuilder.cs" />
     <Compile Include="RmlPlayer\RmlPlayerRepository.cs" />
     <Compile Include="SiteCodes\SiteCode.cs" />
-    <Compile Include="Score.cs" />
+    <Compile Include="Teams\TeamRepository.cs" />
+    <Compile Include="Teams\TeamBuilder.cs" />
+    <Compile Include="Weeks\Score.cs" />
     <Compile Include="SitePlayer\SitePlayerBuilder.cs" />
-    <Compile Include="Team.cs" />
+    <Compile Include="Teams\Team.cs" />
     <Compile Include="Trophies\Trophies.cs" />
     <Compile Include="Trophies\Trophy.cs" />
     <Compile Include="Weeks\WeekRepository.cs" />
@@ -87,6 +89,7 @@
     <None Include="packages.config" />
     <None Include="rmlPlayers.json" />
     <None Include="sitePlayers.json" />
+    <None Include="teams.json" />
     <None Include="weeks.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

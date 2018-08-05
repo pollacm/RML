@@ -10,6 +10,7 @@ using RML.PowerRankings;
 using RML.Returners;
 using RML.RmlPlayer;
 using RML.SitePlayer;
+using RML.Teams;
 using RML.Weeks;
 
 namespace RML
@@ -62,14 +63,12 @@ namespace RML
             //Console.WriteLine("Writing returner File COMPLETE");
 
             //get teams
-            driver.Navigate().GoToUrl($"http://games.espn.com/ffl/standings?leagueId=127291&seasonId={year}");
-            var teamAnchors = driver.FindElements(By.CssSelector("div.games-fullcol table:nth-child(1) a"));
+            var teamBuilder = new TeamBuilder(driver, year);
+            var teamRepository = new TeamRepository();
 
-            var teams = new List<string>();
-            foreach (var teamAnchor in teamAnchors)
-            {
-                teams.Add(teamAnchor.Text);
-            }
+            //var teams = teamBuilder.BuildTeams();
+            //teamRepository.RefreshTeams(teams);
+            var teams = teamRepository.GetTeams();
 
             driver.WaitUntilElementExists(By.CssSelector("table.tableBody"));
 
