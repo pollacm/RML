@@ -1,4 +1,5 @@
-﻿using RML.Teams;
+﻿using System;
+using RML.Teams;
 
 namespace RML.Weeks
 {
@@ -6,5 +7,7 @@ namespace RML.Weeks
     {
         public Team HomeTeam { get; set; }
         public Team AwayTeam { get; set; }
+
+        public decimal MarginOfVictory => Math.Abs(HomeTeam.TeamPoints - AwayTeam.TeamPoints);
     }
 }

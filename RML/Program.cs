@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
+using Newtonsoft.Json;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
@@ -11,6 +13,7 @@ using RML.Returners;
 using RML.RmlPlayer;
 using RML.SitePlayer;
 using RML.Teams;
+using RML.Trophies;
 using RML.Weeks;
 
 namespace RML
@@ -85,15 +88,31 @@ namespace RML
             lastLink.Click();
 
             Thread.Sleep(5000);
+            
+            var opRows = driver.FindElements(By.XPath("//tr[contains(@class, 'pncPlayerRow')]/td[3][not(contains(.,'FA'))]/parent::tr"));
+            var opsOfTheWeek = new List<PlayerOfTheWeek>();
+            var topPoints = 0m;
+            foreach (var opRow in opRows)
+            {
+                var rowPoints = decimal.Parse(opRow.FindElement(By.XPath("./td[contains(@class, 'sortedCell')]")).Text);
+                if (rowPoints >= topPoints)
+                {
+                    topPoints = rowPoints;
+                }
+                else
+                {
+                    break;
+                }
 
-            //TODO: Need to account for more than one
-            var opRow = driver.FindElements(By.XPath("//tr[contains(@class, 'pncPlayerRow')]/td[3][not(contains(.,'FA'))]/parent::tr")).First();
-            var opOfTheWeek = new PlayerOfTheWeek();
-            opOfTheWeek.Name = opRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).Text;
-            opOfTheWeek.Team = opRow.FindElement(By.XPath("./td[3]/a")).GetAttribute("title");
-            opOfTheWeek.TeamAbbreviation = opRow.FindElement(By.XPath("./td[3]/a")).Text;
-            opOfTheWeek.PlayerId = int.Parse(opRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).GetAttribute("playerid"));
-            opOfTheWeek.Points = decimal.Parse(opRow.FindElement(By.XPath("./td[contains(@class, 'sortedCell')]")).Text);
+                var opOfTheWeek = new PlayerOfTheWeek();
+                opOfTheWeek.Name = opRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).Text;
+                opOfTheWeek.Team = opRow.FindElement(By.XPath("./td[3]/a")).GetAttribute("title");
+                opOfTheWeek.TeamAbbreviation = opRow.FindElement(By.XPath("./td[3]/a")).Text;
+                opOfTheWeek.PlayerId = int.Parse(opRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).GetAttribute("playerid"));
+                opOfTheWeek.Points = rowPoints;
+
+                opsOfTheWeek.Add(opOfTheWeek);
+            }
 
             //DP
             var dpLink = driver.FindElement(By.XPath("//ul[@class='filterToolsOptionSet']/li/a[contains(.,'DP')]"));
@@ -101,13 +120,30 @@ namespace RML
 
             Thread.Sleep(2000);
 
-            var dpRow = driver.FindElements(By.XPath("//tr[contains(@class, 'pncPlayerRow')]/td[3][not(contains(.,'FA'))]/parent::tr")).First();
-            var dpOfTheWeek = new PlayerOfTheWeek();
-            dpOfTheWeek.Name = dpRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).Text;
-            dpOfTheWeek.Team = dpRow.FindElement(By.XPath("./td[3]/a")).GetAttribute("title");
-            dpOfTheWeek.TeamAbbreviation = dpRow.FindElement(By.XPath("./td[3]/a")).Text;
-            dpOfTheWeek.PlayerId = int.Parse(dpRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).GetAttribute("playerid"));
-            dpOfTheWeek.Points = decimal.Parse(dpRow.FindElement(By.XPath("./td[contains(@class, 'sortedCell')]")).Text);
+            var dpRows = driver.FindElements(By.XPath("//tr[contains(@class, 'pncPlayerRow')]/td[3][not(contains(.,'FA'))]/parent::tr"));
+            var dpsOfTheWeek = new List<PlayerOfTheWeek>();
+            topPoints = 0m;
+            foreach (var dpRow in dpRows)
+            {
+                var rowPoints = decimal.Parse(dpRow.FindElement(By.XPath("./td[contains(@class, 'sortedCell')]")).Text);
+                if (rowPoints >= topPoints)
+                {
+                    topPoints = rowPoints;
+                }
+                else
+                {
+                    break;
+                }
+
+                var dpOfTheWeek = new PlayerOfTheWeek();
+                dpOfTheWeek.Name = dpRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).Text;
+                dpOfTheWeek.Team = dpRow.FindElement(By.XPath("./td[3]/a")).GetAttribute("title");
+                dpOfTheWeek.TeamAbbreviation = dpRow.FindElement(By.XPath("./td[3]/a")).Text;
+                dpOfTheWeek.PlayerId = int.Parse(dpRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).GetAttribute("playerid"));
+                dpOfTheWeek.Points = rowPoints;
+
+                dpsOfTheWeek.Add(dpOfTheWeek);
+            }
 
             var weekRepository = new WeekRepository();
             var powerRankings = GetPowerRankings(driver, weekRepository);
@@ -123,13 +159,13 @@ namespace RML
                 ";
             }
 
-            CreateLeaguePage(powerRankings, weeklyPayoutTeams, opOfTheWeek, dpOfTheWeek, currentWeek, week);
+            CreateLeaguePage(powerRankings, weeklyPayoutTeams, opsOfTheWeek, dpsOfTheWeek, currentWeek, week);
             //TODO: Assign Trophies.. Need to prompt if it should happen
-            AssignTrophies(currentWeek, driver);
+            AssignTrophies(currentWeek, opsOfTheWeek, dpsOfTheWeek, driver);
             var x = 1;
         }
 
-        private static void CreateLeaguePage(List<PowerRanking> powerRankings, string weeklyPayoutTeams, PlayerOfTheWeek opOfTheWeek, PlayerOfTheWeek dpOfTheWeek, Week currentWeek, int i)
+        private static void CreateLeaguePage(List<PowerRanking> powerRankings, string weeklyPayoutTeams, List<PlayerOfTheWeek> opsOfTheWeek, List<PlayerOfTheWeek> dpsOfTheWeek, Week currentWeek, int i)
         {
             var leagueMessage = @"[b]<update> IN WEEK " + week + @"[/b]!!!!!
 
@@ -145,19 +181,12 @@ namespace RML
 
   [b]OFFENSIVE PLAYER OF THE WEEK[/b]
 
-  [b]" + BuildPlayerOfTheWeek(opOfTheWeek) + @"[/b]
-
-[image]<update>[/image]
-
+  " + BuildPlayersOfTheWeek(opsOfTheWeek) + @"
 
 
   [b]DEFENSIVE PLAYER OF THE WEEK[/b]
 
-  [b]" + BuildPlayerOfTheWeek(dpOfTheWeek) + @"[/b]
-
-[image]<update>[/image]
-
-
+  " + BuildPlayersOfTheWeek(dpsOfTheWeek) + @"
 
   [b]THE 600 CLUB[/b]
   [b]DOUBLE TROUBLE, TOO EASY[/b]
@@ -206,9 +235,20 @@ namespace RML
             return powerRankingString;
         }
 
-        private static string BuildPlayerOfTheWeek(PlayerOfTheWeek playerOfTheWeek)
+        private static string BuildPlayersOfTheWeek(List<PlayerOfTheWeek> playersOfTheWeek)
         {
-            return @"[player#" + playerOfTheWeek.PlayerId + "]" + playerOfTheWeek.Name.ToUpper() + "[/player] (" + playerOfTheWeek.Team.ToUpper() + ") - " + playerOfTheWeek.Points + " POINTS";
+            var playersOfTheWeekString = string.Empty;
+            foreach (var player in playersOfTheWeek)
+            {
+                playersOfTheWeekString += @"
+                [b] [player#" + player.PlayerId + "]" + player.Name.ToUpper() + "[/player] (" + player.Team.ToUpper() + ") - " + player.Points + @" POINTS [/b]
+            
+            [image]<update>[/image]
+            
+            ";
+            }
+
+            return playersOfTheWeekString;
         }
 
         private static string GetRecapInfo(Week currentWeek)
@@ -230,40 +270,82 @@ namespace RML
             return recapString;
         }
 
-        private static void AssignTrophies(Week currentWeek, ChromeDriver driver)
+        //TODO: Need to finish trophies and have them dynamically get generated in the leagueMessage
+        //Need to add a bool for assigntrophies and default to no so you dont accidently assign trophies
+        private static List<Trophy> AssignTrophies(Week currentWeek, List<PlayerOfTheWeek> opsOfTheWeek, List<PlayerOfTheWeek> dpsOfTheWeek, ChromeDriver driver)
         {
-            //http://games.espn.com/ffl/trophylist?leagueId=127291
-            //var week =
-            //Assign500ClubTrophies(currentWeek, driver);
-            //throw new System.NotImplementedException();
-        }
+            var trophies = new List<Trophy>();
 
-        private static void Assign500ClubTrophies(Week currentWeek, ChromeDriver driver)
-        {
-            driver.Navigate().GoToUrl($"http://games.espn.com/ffl/trophylist?leagueId=127291");
+            //500 club
+            var winners = currentWeek.Scores.Where(s => s.AwayTeam.TeamPoints >= 500 && s.AwayTeam.TeamPoints < 600).Select(s => s.AwayTeam).ToList();
+            winners.AddRange(currentWeek.Scores.Where(s => s.HomeTeam.TeamPoints >= 500 && s.AwayTeam.TeamPoints < 600).Select(s => s.HomeTeam));
 
-            var trophies = new Trophies.Trophies();
-            var winners = currentWeek.Scores.Where(s => s.AwayTeam.TeamPoints > 500).Select(s => s.AwayTeam).ToList();
-            winners.AddRange(currentWeek.Scores.Where(s => s.HomeTeam.TeamPoints > 500).Select(s => s.HomeTeam));
-
+            var trophyAssigner = new TrophyAssigner(driver, year);
             foreach (var team in winners.OrderByDescending(t => t.TeamPoints))
             {
-                driver.FindElement(By.XPath("//table/tbody/tr/td/div/div/center/b[contains(.," + trophies.Da500Club + ")]/parent::center/parent::div/div/a[contains(.,'Assign')]")).Click();
-                driver.WaitUntilElementExists(By.Id("assignTrophyDiv"));
-
-                var dropdown = driver.FindElement(By.Id("assignTeamId"));
-                var dropdownSelect = new SelectElement(dropdown);
-                dropdownSelect.SelectByText(team.TeamName);
-
-                driver.FindElement(By.Name("headline")).SendKeys($"For putting up {team.TeamPoints} points!!!!!");
-
-                var showcase = driver.FindElement(By.Id("isShowcase"));
-                var showcaseDropdown = new SelectElement(showcase);
-                showcaseDropdown.SelectByText("Yes");
-
-                //driver.FindElement(By.Name("btnSubmit")).Click();
-                //driver.WaitUntilElementExists(By.ClassName("bodyCopy"));
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new FiveHundredClubTrophy()));
             }
+
+            //600 club
+            winners = currentWeek.Scores.Where(s => s.AwayTeam.TeamPoints >= 600 && s.AwayTeam.TeamPoints < 700).Select(s => s.AwayTeam).ToList();
+            winners.AddRange(currentWeek.Scores.Where(s => s.HomeTeam.TeamPoints >= 600 && s.AwayTeam.TeamPoints < 700).Select(s => s.HomeTeam));
+            foreach (var team in winners.OrderByDescending(t => t.TeamPoints))
+            {
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new SixHundredClubTrophy()));
+            }
+
+            //700 club
+            winners = currentWeek.Scores.Where(s => s.AwayTeam.TeamPoints >= 700).Select(s => s.AwayTeam).ToList();
+            winners.AddRange(currentWeek.Scores.Where(s => s.HomeTeam.TeamPoints >= 700).Select(s => s.HomeTeam));
+            foreach (var team in winners.OrderByDescending(t => t.TeamPoints))
+            {
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new SevenHundredClubTrophy()));
+            }
+
+            //ballers/losers
+            var largestMargin = currentWeek.Scores.OrderByDescending(s => s.MarginOfVictory).First().MarginOfVictory;
+            var ballersAndMeeksOfTheWeek = currentWeek.Scores.Where(s => s.MarginOfVictory == largestMargin);
+
+            foreach (var score in ballersAndMeeksOfTheWeek)
+            {
+                if (score.HomeTeam.TeamPoints > score.AwayTeam.TeamPoints)
+                {
+                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, score.HomeTeam, new BallerOfTheWeekTrophy(), score.MarginOfVictory.ToString(CultureInfo.InvariantCulture)));
+                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, score.AwayTeam, new LoserOfTheWeekTrophy(), score.MarginOfVictory.ToString(CultureInfo.InvariantCulture)));
+                }
+                else
+                {
+                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, score.AwayTeam, new BallerOfTheWeekTrophy(), score.MarginOfVictory.ToString(CultureInfo.InvariantCulture)));
+                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, score.HomeTeam, new LoserOfTheWeekTrophy(), score.MarginOfVictory.ToString(CultureInfo.InvariantCulture)));
+                }
+            }
+
+            Thread.Sleep(2000);
+            //ops
+            var teams = currentWeek.Scores.Select(s => s.HomeTeam).ToList();
+            teams.AddRange(currentWeek.Scores.Select(s => s.AwayTeam));
+
+            foreach (var op in opsOfTheWeek)
+            {
+                string additionalInfo = JsonConvert.SerializeObject(op);
+                var team = teams.Single(t => t.TeamName == op.Team);
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new OffensivePlayerOfTheWeekTrophy(), additionalInfo));
+            }
+
+            //dps
+            foreach (var dp in dpsOfTheWeek)
+            {
+                string additionalInfo = JsonConvert.SerializeObject(dp);
+                var team = teams.Single(t => t.TeamName == dp.Team);
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new DefensivePlayerOfTheWeekTrophy(), additionalInfo));
+            }
+
+            if (currentWeek.WeekNumber == 16)
+            {
+                //assign yearly trophies
+            }
+
+            return trophies;
         }
 
         private static List<PowerRanking> GetPowerRankings(ChromeDriver driver, WeekRepository weekRepository)
