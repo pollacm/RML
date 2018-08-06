@@ -340,7 +340,7 @@ namespace RML
                 trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new DefensivePlayerOfTheWeekTrophy(), additionalInfo));
             }
 
-            if (currentWeek.WeekNumber == 16)
+            if (currentWeek.WeekNumber == 13)
             {
                 //assign yearly trophies
             }

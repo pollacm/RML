@@ -10,3 +10,17 @@ C:\Users\cxp6696\Dropbox\Private\Programs\Fantasy\SeleniumVersion\ConsoleApp1\Co
 C:\Users\cxp6696\Dropbox\Private\Programs\Fantasy\SeleniumVersion\ConsoleApp1\ConsoleApp1\obj\Debug\RML.csproj.CopyComplete
 C:\Users\cxp6696\Dropbox\Private\Programs\Fantasy\SeleniumVersion\ConsoleApp1\ConsoleApp1\obj\Debug\RML.exe
 C:\Users\cxp6696\Dropbox\Private\Programs\Fantasy\SeleniumVersion\ConsoleApp1\ConsoleApp1\obj\Debug\RML.pdb
+C:\Users\Owner\Source\Repos\RML\RML\obj\Debug\RML.csprojAssemblyReference.cache
+C:\Users\Owner\Source\Repos\RML\RML\obj\Debug\RML.csproj.CoreCompileInputs.cache
+C:\Users\Owner\Source\Repos\RML\RML\obj\Debug\RML.exe
+C:\Users\Owner\Source\Repos\RML\RML\obj\Debug\RML.pdb
+C:\Users\Owner\Source\Repos\RML\RML\bin\Debug\RML.exe.config
+C:\Users\Owner\Source\Repos\RML\RML\bin\Debug\RML.exe
+C:\Users\Owner\Source\Repos\RML\RML\bin\Debug\RML.pdb
+C:\Users\Owner\Source\Repos\RML\RML\bin\Debug\WebDriver.dll
+C:\Users\Owner\Source\Repos\RML\RML\bin\Debug\WebDriver.Support.dll
+C:\Users\Owner\Source\Repos\RML\RML\bin\Debug\WebDriver.xml
+C:\Users\Owner\Source\Repos\RML\RML\bin\Debug\WebDriver.Support.xml
+C:\Users\Owner\Source\Repos\RML\RML\obj\Debug\RML.csproj.CopyComplete
+C:\Users\Owner\source\repos\RML\RML\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Owner\source\repos\RML\RML\bin\Debug\Newtonsoft.Json.xml
