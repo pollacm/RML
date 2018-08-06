@@ -57,6 +57,8 @@
     <Compile Include="PlayerComparer\PlayerConstants.cs" />
     <Compile Include="PlayerComparer\PrintPlayerComparerService.cs" />
     <Compile Include="PlayerComparer\PlayerComparerHelper.cs" />
+    <Compile Include="Rankings\Ranking.cs" />
+    <Compile Include="Rankings\RankingGenerator.cs" />
     <Compile Include="SiteCodes\SiteCodeHelper.cs" />
     <Compile Include="SitePlayer\SitePlayerRepository.cs" />
     <Compile Include="SitePlayer\SitePlayer.cs" />
@@ -73,8 +75,17 @@
     <Compile Include="Returners\ReturnerBuilder.cs" />
     <Compile Include="RmlPlayer\RmlPlayerRepository.cs" />
     <Compile Include="SiteCodes\SiteCode.cs" />
+    <Compile Include="Standings\Standing.cs" />
+    <Compile Include="Standings\StandingsGenerator.cs" />
     <Compile Include="Teams\TeamRepository.cs" />
     <Compile Include="Teams\TeamBuilder.cs" />
+    <Compile Include="Trophies\NfcDivisionChampionshipTrophy.cs" />
+    <Compile Include="Trophies\AfcDivisionChampionshipTrophy.cs" />
+    <Compile Include="Trophies\HighestScoringSeasonTrophy.cs" />
+    <Compile Include="Trophies\BottomRankedSeasonTrophy.cs" />
+    <Compile Include="Trophies\DefensivePlayerOfTheYearTrophy.cs" />
+    <Compile Include="Trophies\OffensivePlayerOfTheYearTrophy.cs" />
+    <Compile Include="Trophies\TopRankedSeasonTrophy.cs" />
     <Compile Include="Trophies\DefensivePlayerOfTheWeekTrophy.cs" />
     <Compile Include="Trophies\OffensivePlayerOfTheWeekTrophy.cs" />
     <Compile Include="Trophies\LoserOfTheWeekTrophy.cs" />

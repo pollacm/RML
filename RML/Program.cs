@@ -9,9 +9,11 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using RML.PlayerComparer;
 using RML.PowerRankings;
+using RML.Rankings;
 using RML.Returners;
 using RML.RmlPlayer;
 using RML.SitePlayer;
+using RML.Standings;
 using RML.Teams;
 using RML.Trophies;
 using RML.Weeks;
@@ -159,9 +161,11 @@ namespace RML
                 ";
             }
 
-            CreateLeaguePage(powerRankings, weeklyPayoutTeams, opsOfTheWeek, dpsOfTheWeek, currentWeek, week);
             //TODO: Assign Trophies.. Need to prompt if it should happen
-            AssignTrophies(currentWeek, opsOfTheWeek, dpsOfTheWeek, driver);
+            //TODO: Need to get trophy text and send that through to the league page
+            var trophies = AssignTrophies(currentWeek, opsOfTheWeek, dpsOfTheWeek, driver);
+
+            CreateLeaguePage(powerRankings, weeklyPayoutTeams, opsOfTheWeek, dpsOfTheWeek, currentWeek, week);
             var x = 1;
         }
 
@@ -342,7 +346,111 @@ namespace RML
 
             if (currentWeek.WeekNumber == 13)
             {
-                //assign yearly trophies
+                var rankingGenerator = new RankingGenerator(driver, year);
+                var rankings = rankingGenerator.GenerateRankings();
+
+                //#1 ranked
+                var topRanked = rankings.OrderBy(r => r.Rank).First();
+                var topRankedTeam = teams.Single(t => t.TeamName == topRanked.Team);
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, topRankedTeam, new TopRankedSeasonTrophy(), topRanked.Team));
+
+                //top scoring
+                var standings = new StandingsGenerator(driver, year).GenerateStandings();
+                var highestScoringStanding = standings.OrderByDescending(s => s.PointsFor).First();
+                var standingInfo = JsonConvert.SerializeObject(highestScoringStanding);
+                var highestScoringTeam = teams.Single(t => t.TeamName == highestScoringStanding.Team);
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, highestScoringTeam, new HighestScoringSeasonTrophy(), standingInfo));
+
+                //OPOY
+                driver.Navigate().GoToUrl($"http://games.espn.com/ffl/freeagency?leagueId=127291&seasonId={year}");
+                driver.WaitUntilElementExists(By.Id("playerTableContainerDiv"));
+
+                var opLink = driver.FindElement(By.XPath("//ul[@class='filterToolsOptionSet']/li/a[contains(.,'OP')]"));
+                opLink.Click();
+
+                Thread.Sleep(2000);
+                
+                var opRows = driver.FindElements(By.XPath("//tr[contains(@class, 'pncPlayerRow')]/td[3][not(contains(.,'FA'))]/parent::tr"));
+                var opsOfTheYear = new List<PlayerOfTheWeek>();
+                var topPoints = 0m;
+                foreach (var opRow in opRows)
+                {
+                    var rowPoints = decimal.Parse(opRow.FindElement(By.XPath("./td[contains(@class, 'sortedCell')]")).Text);
+                    if (rowPoints >= topPoints)
+                    {
+                        topPoints = rowPoints;
+                    }
+                    else
+                    {
+                        break;
+                    }
+
+                    var opOfTheYear = new PlayerOfTheWeek();
+                    opOfTheYear.Name = opRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).Text;
+                    opOfTheYear.Team = opRow.FindElement(By.XPath("./td[3]/a")).GetAttribute("title");
+                    opOfTheYear.TeamAbbreviation = opRow.FindElement(By.XPath("./td[3]/a")).Text;
+                    opOfTheYear.PlayerId = int.Parse(opRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).GetAttribute("playerid"));
+                    opOfTheYear.Points = rowPoints;
+
+                    opsOfTheYear.Add(opOfTheYear);
+                }
+
+                //DPOY
+                var dpLink = driver.FindElement(By.XPath("//ul[@class='filterToolsOptionSet']/li/a[contains(.,'DP')]"));
+                dpLink.Click();
+                var dpsOfTheYear = new List<PlayerOfTheWeek>();
+                Thread.Sleep(2000);
+
+                var dpRows = driver.FindElements(By.XPath("//tr[contains(@class, 'pncPlayerRow')]/td[3][not(contains(.,'FA'))]/parent::tr"));
+                topPoints = 0m;
+                foreach (var dpRow in dpRows)
+                {
+                    var rowPoints = decimal.Parse(dpRow.FindElement(By.XPath("./td[contains(@class, 'sortedCell')]")).Text);
+                    if (rowPoints >= topPoints)
+                    {
+                        topPoints = rowPoints;
+                    }
+                    else
+                    {
+                        break;
+                    }
+
+                    var dpOfTheYear = new PlayerOfTheWeek();
+                    dpOfTheYear.Name = dpRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).Text;
+                    dpOfTheYear.Team = dpRow.FindElement(By.XPath("./td[3]/a")).GetAttribute("title");
+                    dpOfTheYear.TeamAbbreviation = dpRow.FindElement(By.XPath("./td[3]/a")).Text;
+                    dpOfTheYear.PlayerId = int.Parse(dpRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).GetAttribute("playerid"));
+                    dpOfTheYear.Points = rowPoints;
+                    dpsOfTheYear.Add(dpOfTheYear);
+                }
+
+                foreach (var opOfTheYear in opsOfTheYear)
+                {
+                    var additionalInfo = JsonConvert.SerializeObject(opOfTheYear);
+                    var opoyTeam = teams.Single(t => t.TeamName == opOfTheYear.Team);
+                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, opoyTeam, new OffensivePlayerOfTheYearTrophy(), additionalInfo));
+                }
+
+                foreach (var dpOfTheYear in dpsOfTheYear)
+                {
+                    var additionalInfo = JsonConvert.SerializeObject(dpOfTheYear);
+                    var dpoyTeam = teams.Single(t => t.TeamName == dpOfTheYear.Team);
+                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, dpoyTeam, new DefensivePlayerOfTheYearTrophy(), additionalInfo));
+                }
+
+                //NFC champ
+                var nfcChamp = rankings.Where(s => s.Division == "NFC").OrderBy(s => s.Rank).First();
+                var nfcChampionshipTeam = teams.Single(t => t.TeamName == nfcChamp.Team);
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, nfcChampionshipTeam, new NfcDivisionChampionshipTrophy(), string.Empty));
+                //AFC champ
+                var afcChamp = rankings.Where(s => s.Division == "AFC").OrderBy(s => s.Rank).First();
+                var afcChampionshipTeam = teams.Single(t => t.TeamName == afcChamp.Team);
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, afcChampionshipTeam, new AfcDivisionChampionshipTrophy(), string.Empty));
+
+                //#12 ranked
+                var bottomRanked = rankings.OrderByDescending(r => r.Rank).First();
+                var bottomRankedTeam = teams.Single(t => t.TeamName == bottomRanked.Team);
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, bottomRankedTeam, new BottomRankedSeasonTrophy(), bottomRanked.Team));
             }
 
             return trophies;

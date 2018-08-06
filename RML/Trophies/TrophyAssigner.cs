@@ -22,11 +22,19 @@ namespace RML.Trophies
         public Trophy AssignTrophy(Week currentWeek, Team team, ITrophy trophyToAssign, string additionalInfo = "")
         {
             var trophy = new Trophy();
-            
-            _driver.Navigate().GoToUrl($"http://games.espn.com/ffl/trophylist?leagueId=127291");
 
-            var winners = currentWeek.Scores.Where(s => s.AwayTeam.TeamPoints > 500).Select(s => s.AwayTeam).ToList();
-            winners.AddRange(currentWeek.Scores.Where(s => s.HomeTeam.TeamPoints > 500).Select(s => s.HomeTeam));
+            var start = 0;
+            _driver.Navigate().GoToUrl($"http://games.espn.com/ffl/trophylist?leagueId=127291&start={start}");
+            
+            //http://games.espn.com/ffl/trophylist?leagueId=127291&start=12
+
+            var foundTrophyLabel = _driver.FindElements(By.XPath("//table/tbody/tr/td/div/div/center/b[contains(.,'" + trophyToAssign.GetTrophyName() + "')]")).Count() == 1;
+
+            if (!foundTrophyLabel)
+            {
+                start = 12;
+                _driver.Navigate().GoToUrl($"http://games.espn.com/ffl/trophylist?leagueId=127291&start={start}");
+            }
 
             _driver.FindElement(By.XPath("//table/tbody/tr/td/div/div/center/b[contains(.,'" + trophyToAssign.GetTrophyName() + "')]/parent::center/parent::div/div/a[contains(.,'Assign')]")).Click();
             _driver.WaitUntilElementExists(By.Id("assignTrophyDiv"));

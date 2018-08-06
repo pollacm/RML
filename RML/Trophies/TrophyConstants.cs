@@ -8,7 +8,7 @@ namespace RML.Trophies
 {
     public static class TrophyConstants
     {
-        public static string Da500Club = @"Da 500 Club";
+        public static string Da500Club = @"500 Club";
         public static string Da600Club = @"600 CLUB";
         public static string Da700Club = @"700 CLUB";
         public static string LargestMarginWeekWinner = @"APESHIT!";
