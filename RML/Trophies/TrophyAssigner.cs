@@ -19,6 +19,7 @@ namespace RML.Trophies
             _driver = driver;
             _year = year;
         }
+        //TODO: Add a boolean for assign that gets passed in from user input
         public ITrophy AssignTrophy(Week currentWeek, Team team, ITrophy trophyToAssign)
         {
             var start = 0;
