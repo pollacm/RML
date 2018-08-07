@@ -19,10 +19,8 @@ namespace RML.Trophies
             _driver = driver;
             _year = year;
         }
-        public Trophy AssignTrophy(Week currentWeek, Team team, ITrophy trophyToAssign, string additionalInfo = "")
+        public ITrophy AssignTrophy(Week currentWeek, Team team, ITrophy trophyToAssign)
         {
-            var trophy = new Trophy();
-
             var start = 0;
             _driver.Navigate().GoToUrl($"http://games.espn.com/ffl/trophylist?leagueId=127291&start={start}");
             
@@ -43,8 +41,8 @@ namespace RML.Trophies
             var dropdownSelect = new SelectElement(dropdown);
             dropdownSelect.SelectByText(team.TeamName);
 
-            _driver.FindElement(By.Name("headline")).SendKeys(trophyToAssign.GetHeadline(team, additionalInfo));
-            _driver.FindElement(By.Name("reason")).SendKeys(trophyToAssign.GetReason(team, additionalInfo));
+            _driver.FindElement(By.Name("headline")).SendKeys(trophyToAssign.GetHeadline(team));
+            _driver.FindElement(By.Name("reason")).SendKeys(trophyToAssign.GetReason(team));
 
             var showcase = _driver.FindElement(By.Id("isShowcase"));
             var showcaseDropdown = new SelectElement(showcase);
@@ -53,12 +51,9 @@ namespace RML.Trophies
             //_driver.FindElement(By.Name("btnSubmit")).Click();
             //_driver.WaitUntilElementExists(By.ClassName("bodyCopy"));
 
-            trophy.TrophyName = trophyToAssign.GetTrophyName();
-            trophy.TeamName = team.TeamName;
-
             Thread.Sleep(2000);
 
-            return trophy;
+            return trophyToAssign;
         }
     }
 }

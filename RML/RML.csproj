@@ -95,6 +95,7 @@
     <Compile Include="Trophies\FiveHundredClubTrophy.cs" />
     <Compile Include="Trophies\ITrophy.cs" />
     <Compile Include="Trophies\TrophyAssigner.cs" />
+    <Compile Include="Trophies\TrophyWriter.cs" />
     <Compile Include="Weeks\Score.cs" />
     <Compile Include="SitePlayer\SitePlayerBuilder.cs" />
     <Compile Include="Teams\Team.cs" />
