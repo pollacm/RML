@@ -330,8 +330,8 @@ namespace RML
                 trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new DefensivePlayerOfTheWeekTrophy(team, additionalInfo)));
             }
 
-            //if (currentWeek.WeekNumber == 13)
-            //{
+            if (currentWeek.WeekNumber == 13)
+            {
                 var rankingGenerator = new RankingGenerator(driver, year);
                 var rankings = rankingGenerator.GenerateRankings();
 
@@ -437,7 +437,7 @@ namespace RML
                 var bottomRanked = rankings.OrderByDescending(r => r.Rank).First();
                 var bottomRankedTeam = teams.Single(t => t.TeamName == bottomRanked.Team);
                 trophies.Add(trophyAssigner.AssignTrophy(currentWeek, bottomRankedTeam, new BottomRankedSeasonTrophy(bottomRankedTeam, bottomRanked.Team)));
-            //}
+            }
 
             return trophies;
         }
