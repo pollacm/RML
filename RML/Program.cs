@@ -22,8 +22,8 @@ namespace RML
 {
     internal class Program
     {
-        private static readonly int year = 2017;
-        private static readonly int week = 10;
+        private static readonly int year = 2018;
+        private static readonly int week = 1;
 
         private static void Main(string[] args)
         {
@@ -51,9 +51,10 @@ namespace RML
 
             //var rmlPlayerBuilder = new RmlPlayerBuilder(driver, 2018);
             //var rmlPlayers = rmlPlayerBuilder.BuildRmlPlayers();
+            //var rmlPlayerRepository = new RmlPlayerRepository();
+
             //rmlPlayerRepository.RefreshRmlPlayers(rmlPlayers);
 
-            //var rmlPlayerRepository = new RmlPlayerRepository();
             //var rmlPlayers = rmlPlayerRepository.GetRmlPlayers();
 
             //var sitePlayerBuilder = new SitePlayerBuilder(driver);
@@ -67,13 +68,19 @@ namespace RML
             //new PrintPlayerComparerService(sitePlayers.OrderBy(p => p.Name).ToList(), rmlPlayers).WritePlayerComparerFile();
             //Console.WriteLine("Writing returner File COMPLETE");
 
+            //postDraftRankings
+            //var postDraftRankingGenerator = new PostDraftRankingGenerator(driver);
+            //postDraftRankingGenerator.GenerateRankings();
+
+            //driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 0, 5);
+
             //get teams
-            var teamBuilder = new TeamBuilder(driver, year);
-            var teamRepository = new TeamRepository();
+            //var teamBuilder = new TeamBuilder(driver, year);
+            //var teamRepository = new TeamRepository();
 
             //var teams = teamBuilder.BuildTeams();
             //teamRepository.RefreshTeams(teams);
-            var teams = teamRepository.GetTeams();
+            //var teams = teamRepository.GetTeams();
 
             driver.WaitUntilElementExists(By.CssSelector("table.tableBody"));
 
@@ -83,6 +90,11 @@ namespace RML
 
             var opLink = driver.FindElement(By.XPath("//ul[@class='filterToolsOptionSet']/li/a[contains(.,'OP')]"));
             opLink.Click();
+
+            Thread.Sleep(2000);
+
+            var onRosterLink = driver.FindElement(By.XPath("//ul[@class='filterToolsOptionSet']/li/a[contains(.,'On Rosters')]"));
+            onRosterLink.Click();
 
             Thread.Sleep(2000);
 
@@ -282,7 +294,7 @@ namespace RML
 
             //500 club
             var winners = currentWeek.Scores.Where(s => s.AwayTeam.TeamPoints >= 500 && s.AwayTeam.TeamPoints < 600).Select(s => s.AwayTeam).ToList();
-            winners.AddRange(currentWeek.Scores.Where(s => s.HomeTeam.TeamPoints >= 500 && s.AwayTeam.TeamPoints < 600).Select(s => s.HomeTeam));
+            winners.AddRange(currentWeek.Scores.Where(s => s.HomeTeam.TeamPoints >= 500 && s.HomeTeam.TeamPoints < 600).Select(s => s.HomeTeam));
 
             var trophyAssigner = new TrophyAssigner(driver, year);
             foreach (var team in winners.OrderByDescending(t => t.TeamPoints))
@@ -292,7 +304,7 @@ namespace RML
 
             //600 club
             winners = currentWeek.Scores.Where(s => s.AwayTeam.TeamPoints >= 600 && s.AwayTeam.TeamPoints < 700).Select(s => s.AwayTeam).ToList();
-            winners.AddRange(currentWeek.Scores.Where(s => s.HomeTeam.TeamPoints >= 600 && s.AwayTeam.TeamPoints < 700).Select(s => s.HomeTeam));
+            winners.AddRange(currentWeek.Scores.Where(s => s.HomeTeam.TeamPoints >= 600 && s.HomeTeam.TeamPoints < 700).Select(s => s.HomeTeam));
             foreach (var team in winners.OrderByDescending(t => t.TeamPoints))
             {
                 trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new SixHundredClubTrophy()));
