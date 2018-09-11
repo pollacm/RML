@@ -19,6 +19,8 @@ namespace RML
                 Console.WriteLine("Element with locator: '" + elementLocator + "' was not found in current context page.");
                 throw;
             }
+
+            return null;
         }
 
         public static void NavigateToUrl(this ChromeDriver driver, string url)

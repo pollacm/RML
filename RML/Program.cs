@@ -174,13 +174,13 @@ namespace RML
             }
             
             List<ITrophy> trophies = new List<ITrophy>();
-            Console.WriteLine("Do you want to assign trophies? (Y/N[default])");
-            var assignTrophiesInput = Console.ReadLine();
+            //Console.WriteLine("Do you want to assign trophies? (Y/N[default])");
+            //var assignTrophiesInput = Console.ReadLine();
 
-            if (assignTrophiesInput == "Y")
-            {
+            //if (assignTrophiesInput == "Y")
+            //{
                 trophies = AssignTrophies(currentWeek, opsOfTheWeek, dpsOfTheWeek, driver);
-            }
+            //}
 
             CreateLeaguePage(powerRankings, weeklyPayoutTeams, trophies, currentWeek, week);
             var x = 1;
@@ -330,7 +330,7 @@ namespace RML
             foreach (var op in opsOfTheWeek)
             {
                 string additionalInfo = JsonConvert.SerializeObject(op);
-                var team = teams.Single(t => t.TeamName == op.Team);
+                var team = teams.Single(t => t.TeamAbbreviation == op.TeamAbbreviation);
                 trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new OffensivePlayerOfTheWeekTrophy(team, additionalInfo)));
             }
 
@@ -338,7 +338,7 @@ namespace RML
             foreach (var dp in dpsOfTheWeek)
             {
                 string additionalInfo = JsonConvert.SerializeObject(dp);
-                var team = teams.Single(t => t.TeamName == dp.Team);
+                var team = teams.Single(t => t.TeamAbbreviation == dp.TeamAbbreviation);
                 trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new DefensivePlayerOfTheWeekTrophy(team, additionalInfo)));
             }
 
