@@ -84,7 +84,7 @@ namespace RML
 
             driver.WaitUntilElementExists(By.CssSelector("table.tableBody"));
 
-            //OP
+            //OPS
             driver.Navigate().GoToUrl($"http://games.espn.com/ffl/freeagency?leagueId=127291&seasonId={year}");
             driver.WaitUntilElementExists(By.Id("playerTableContainerDiv"));
 
@@ -102,7 +102,7 @@ namespace RML
             lastLink.Click();
 
             Thread.Sleep(5000);
-            
+
             var opRows = driver.FindElements(By.XPath("//tr[contains(@class, 'pncPlayerRow')]/td[3][not(contains(.,'FA'))]/parent::tr"));
             var opsOfTheWeek = new List<PlayerOfTheWeek>();
             var topPoints = 0m;
@@ -128,7 +128,7 @@ namespace RML
                 opsOfTheWeek.Add(opOfTheWeek);
             }
 
-            //DP
+            //DPS
             var dpLink = driver.FindElement(By.XPath("//ul[@class='filterToolsOptionSet']/li/a[contains(.,'DP')]"));
             dpLink.Click();
 
@@ -172,16 +172,22 @@ namespace RML
                 weeklyPayoutTeams += i + ". " + teamsForWeeklyPayouts.OrderByDescending(t => t.TeamPoints).First().TeamName.ToUpper() + @"
                 ";
             }
+            
+            List<ITrophy> trophies = new List<ITrophy>();
+            Console.WriteLine("Do you want to assign trophies? (Y/N[default])");
+            var assignTrophiesInput = Console.ReadLine();
 
-            //TODO: Assign Trophies.. Need to prompt if it should happen
-            //TODO: Need to get trophy text and send that through to the league page
-            var trophies = AssignTrophies(currentWeek, opsOfTheWeek, dpsOfTheWeek, driver);
+            if (assignTrophiesInput == "Y")
+            {
+                trophies = AssignTrophies(currentWeek, opsOfTheWeek, dpsOfTheWeek, driver);
+            }
 
-            CreateLeaguePage(powerRankings, weeklyPayoutTeams, opsOfTheWeek, dpsOfTheWeek, currentWeek, week);
+            CreateLeaguePage(powerRankings, weeklyPayoutTeams, trophies, currentWeek, week);
             var x = 1;
         }
 
-        private static void CreateLeaguePage(List<PowerRanking> powerRankings, string weeklyPayoutTeams, List<PlayerOfTheWeek> opsOfTheWeek, List<PlayerOfTheWeek> dpsOfTheWeek, Week currentWeek, int i)
+        //TODO: assign old league message to dropbox folder under the previous week, new week under the new week
+        private static void CreateLeaguePage(List<PowerRanking> powerRankings, string weeklyPayoutTeams, List<ITrophy> trophies, Week currentWeek, int i)
         {
             var leagueMessage = @"[b]<update> IN WEEK " + week + @"[/b]!!!!!
 
@@ -195,31 +201,7 @@ namespace RML
 
 " + GetRecapInfo(currentWeek) + @"
 
-  [b]OFFENSIVE PLAYER OF THE WEEK[/b]
-
-  " + BuildPlayersOfTheWeek(opsOfTheWeek) + @"
-
-
-  [b]DEFENSIVE PLAYER OF THE WEEK[/b]
-
-  " + BuildPlayersOfTheWeek(dpsOfTheWeek) + @"
-
-  [b]THE 600 CLUB[/b]
-  [b]DOUBLE TROUBLE, TOO EASY[/b]
-
-
-  [b]THE 500 CLUB[/b]
-  [b]NO MERCY GOONZ, !ZO, BAMA BLACKOUT, WIDE RECEIVER SAMMIE[/b]
-
-
-  [b]I'M All THE WAY UP! AWARD GOES TO...[/b]
-  [b]WIDE RECEIVER SAMMIE[/b]
-
-
-  [b]MEEK MILLZ!!!AWARD GOES TO...[/b]
-  [b]NO FLEX ZONE[/b]
-
-
+  [b]" + BuildTrophies(trophies) + @"[/b]
   [i][b]DISCLAIMER:[/b] For the [b]POWER RANKINGS[/b], I use an algorithm to calculate how likely you are to win against another team at any given time.It's not my personal opinion of the teams. The algorithm is basically a total of your points scored over the last 3 weeks, plus 50 points for each win over that same time period. [/i]
   
   [b]WEEK " + week + @" POWER RANKINGS[/b]
@@ -232,6 +214,12 @@ namespace RML
   " + weeklyPayoutTeams + @"
   [/b]
 ";
+        }
+
+        private static string BuildTrophies(List<ITrophy> trophies)
+        {
+            var trophyWriter = new TrophyWriter(trophies);
+            return trophyWriter.GetTrophyTextForLeaguePage();
         }
 
         private static string GeneratePowerRankings(List<PowerRanking> powerRankings)
@@ -286,11 +274,9 @@ namespace RML
             return recapString;
         }
 
-        //TODO: Need to finish trophies and have them dynamically get generated in the leagueMessage
-        //Need to add a bool for assigntrophies and default to no so you dont accidently assign trophies
-        private static List<Trophy> AssignTrophies(Week currentWeek, List<PlayerOfTheWeek> opsOfTheWeek, List<PlayerOfTheWeek> dpsOfTheWeek, ChromeDriver driver)
+        private static List<ITrophy> AssignTrophies(Week currentWeek, List<PlayerOfTheWeek> opsOfTheWeek, List<PlayerOfTheWeek> dpsOfTheWeek, ChromeDriver driver)
         {
-            var trophies = new List<Trophy>();
+            var trophies = new List<ITrophy>();
 
             //500 club
             var winners = currentWeek.Scores.Where(s => s.AwayTeam.TeamPoints >= 500 && s.AwayTeam.TeamPoints < 600).Select(s => s.AwayTeam).ToList();
@@ -299,7 +285,7 @@ namespace RML
             var trophyAssigner = new TrophyAssigner(driver, year);
             foreach (var team in winners.OrderByDescending(t => t.TeamPoints))
             {
-                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new FiveHundredClubTrophy()));
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new FiveHundredClubTrophy(team, string.Empty)));
             }
 
             //600 club
@@ -307,7 +293,7 @@ namespace RML
             winners.AddRange(currentWeek.Scores.Where(s => s.HomeTeam.TeamPoints >= 600 && s.HomeTeam.TeamPoints < 700).Select(s => s.HomeTeam));
             foreach (var team in winners.OrderByDescending(t => t.TeamPoints))
             {
-                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new SixHundredClubTrophy()));
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new SixHundredClubTrophy(team, string.Empty)));
             }
 
             //700 club
@@ -315,7 +301,7 @@ namespace RML
             winners.AddRange(currentWeek.Scores.Where(s => s.HomeTeam.TeamPoints >= 700).Select(s => s.HomeTeam));
             foreach (var team in winners.OrderByDescending(t => t.TeamPoints))
             {
-                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new SevenHundredClubTrophy()));
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new SevenHundredClubTrophy(team, string.Empty)));
             }
 
             //ballers/losers
@@ -326,13 +312,13 @@ namespace RML
             {
                 if (score.HomeTeam.TeamPoints > score.AwayTeam.TeamPoints)
                 {
-                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, score.HomeTeam, new BallerOfTheWeekTrophy(), score.MarginOfVictory.ToString(CultureInfo.InvariantCulture)));
-                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, score.AwayTeam, new LoserOfTheWeekTrophy(), score.MarginOfVictory.ToString(CultureInfo.InvariantCulture)));
+                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, score.HomeTeam, new BallerOfTheWeekTrophy(score.HomeTeam, score.MarginOfVictory.ToString(CultureInfo.InvariantCulture))));
+                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, score.AwayTeam, new LoserOfTheWeekTrophy(score.AwayTeam, score.MarginOfVictory.ToString(CultureInfo.InvariantCulture))));
                 }
                 else
                 {
-                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, score.AwayTeam, new BallerOfTheWeekTrophy(), score.MarginOfVictory.ToString(CultureInfo.InvariantCulture)));
-                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, score.HomeTeam, new LoserOfTheWeekTrophy(), score.MarginOfVictory.ToString(CultureInfo.InvariantCulture)));
+                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, score.AwayTeam, new BallerOfTheWeekTrophy(score.AwayTeam, score.MarginOfVictory.ToString(CultureInfo.InvariantCulture))));
+                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, score.HomeTeam, new LoserOfTheWeekTrophy(score.HomeTeam, score.MarginOfVictory.ToString(CultureInfo.InvariantCulture))));
                 }
             }
 
@@ -345,7 +331,7 @@ namespace RML
             {
                 string additionalInfo = JsonConvert.SerializeObject(op);
                 var team = teams.Single(t => t.TeamName == op.Team);
-                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new OffensivePlayerOfTheWeekTrophy(), additionalInfo));
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new OffensivePlayerOfTheWeekTrophy(team, additionalInfo)));
             }
 
             //dps
@@ -353,7 +339,7 @@ namespace RML
             {
                 string additionalInfo = JsonConvert.SerializeObject(dp);
                 var team = teams.Single(t => t.TeamName == dp.Team);
-                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new DefensivePlayerOfTheWeekTrophy(), additionalInfo));
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, team, new DefensivePlayerOfTheWeekTrophy(team, additionalInfo)));
             }
 
             if (currentWeek.WeekNumber == 13)
@@ -364,14 +350,14 @@ namespace RML
                 //#1 ranked
                 var topRanked = rankings.OrderBy(r => r.Rank).First();
                 var topRankedTeam = teams.Single(t => t.TeamName == topRanked.Team);
-                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, topRankedTeam, new TopRankedSeasonTrophy(), topRanked.Team));
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, topRankedTeam, new TopRankedSeasonTrophy(topRankedTeam, topRanked.Team)));
 
                 //top scoring
                 var standings = new StandingsGenerator(driver, year).GenerateStandings();
                 var highestScoringStanding = standings.OrderByDescending(s => s.PointsFor).First();
                 var standingInfo = JsonConvert.SerializeObject(highestScoringStanding);
                 var highestScoringTeam = teams.Single(t => t.TeamName == highestScoringStanding.Team);
-                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, highestScoringTeam, new HighestScoringSeasonTrophy(), standingInfo));
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, highestScoringTeam, new HighestScoringSeasonTrophy(highestScoringTeam, standingInfo)));
 
                 //OPOY
                 driver.Navigate().GoToUrl($"http://games.espn.com/ffl/freeagency?leagueId=127291&seasonId={year}");
@@ -440,29 +426,29 @@ namespace RML
                 {
                     var additionalInfo = JsonConvert.SerializeObject(opOfTheYear);
                     var opoyTeam = teams.Single(t => t.TeamName == opOfTheYear.Team);
-                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, opoyTeam, new OffensivePlayerOfTheYearTrophy(), additionalInfo));
+                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, opoyTeam, new OffensivePlayerOfTheYearTrophy(opoyTeam, additionalInfo)));
                 }
 
                 foreach (var dpOfTheYear in dpsOfTheYear)
                 {
                     var additionalInfo = JsonConvert.SerializeObject(dpOfTheYear);
                     var dpoyTeam = teams.Single(t => t.TeamName == dpOfTheYear.Team);
-                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, dpoyTeam, new DefensivePlayerOfTheYearTrophy(), additionalInfo));
+                    trophies.Add(trophyAssigner.AssignTrophy(currentWeek, dpoyTeam, new DefensivePlayerOfTheYearTrophy(dpoyTeam, additionalInfo)));
                 }
 
                 //NFC champ
                 var nfcChamp = rankings.Where(s => s.Division == "NFC").OrderBy(s => s.Rank).First();
                 var nfcChampionshipTeam = teams.Single(t => t.TeamName == nfcChamp.Team);
-                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, nfcChampionshipTeam, new NfcDivisionChampionshipTrophy(), string.Empty));
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, nfcChampionshipTeam, new NfcDivisionChampionshipTrophy(nfcChampionshipTeam, string.Empty)));
                 //AFC champ
                 var afcChamp = rankings.Where(s => s.Division == "AFC").OrderBy(s => s.Rank).First();
                 var afcChampionshipTeam = teams.Single(t => t.TeamName == afcChamp.Team);
-                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, afcChampionshipTeam, new AfcDivisionChampionshipTrophy(), string.Empty));
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, afcChampionshipTeam, new AfcDivisionChampionshipTrophy(afcChampionshipTeam, string.Empty)));
 
                 //#12 ranked
                 var bottomRanked = rankings.OrderByDescending(r => r.Rank).First();
                 var bottomRankedTeam = teams.Single(t => t.TeamName == bottomRanked.Team);
-                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, bottomRankedTeam, new BottomRankedSeasonTrophy(), bottomRanked.Team));
+                trophies.Add(trophyAssigner.AssignTrophy(currentWeek, bottomRankedTeam, new BottomRankedSeasonTrophy(bottomRankedTeam, bottomRanked.Team)));
             }
 
             return trophies;
