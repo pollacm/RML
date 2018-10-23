@@ -57,7 +57,10 @@
     <Compile Include="PlayerComparer\PlayerConstants.cs" />
     <Compile Include="PlayerComparer\PrintPlayerComparerService.cs" />
     <Compile Include="PlayerComparer\PlayerComparerHelper.cs" />
+    <Compile Include="Rankings\PostDraftRanking.cs" />
+    <Compile Include="Rankings\PrintPostDraftRankingsService.cs" />
     <Compile Include="Rankings\Ranking.cs" />
+    <Compile Include="Rankings\PostDraftRankingsGenerator.cs" />
     <Compile Include="Rankings\RankingGenerator.cs" />
     <Compile Include="SiteCodes\SiteCodeHelper.cs" />
     <Compile Include="SitePlayer\SitePlayerRepository.cs" />
