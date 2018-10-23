@@ -86,18 +86,18 @@ namespace RML.Returners
                     var espnKickReturners = espnKickReturnersElement[0].FindElements(By.XPath("./parent::tr/td"));
 
                     if (espnKickReturners.Count > 1)
-                        returner.EspnPrimaryKickReturner = espnKickReturners[1].Text;
+                        returner.EspnPrimaryKickReturner = espnKickReturners[1].Text.TrimEnd(" Q", StringComparison.Ordinal).TrimEnd(" O", StringComparison.Ordinal);
 
                     if (espnKickReturners.Count > 2)
                     {
                         if (espnKickReturners[0].Text == string.Empty)
-                            returner.EspnPrimaryKickReturner = espnKickReturners[2].Text;
+                            returner.EspnPrimaryKickReturner = espnKickReturners[1].Text.TrimEnd(" Q", StringComparison.Ordinal).TrimEnd(" O", StringComparison.Ordinal);
                         else
-                            returner.EspnSecondaryKickReturner = espnKickReturners[2].Text;
+                            returner.EspnSecondaryKickReturner = espnKickReturners[2].Text.TrimEnd(" Q", StringComparison.Ordinal).TrimEnd(" O", StringComparison.Ordinal);
                     }
 
                     if (espnKickReturners.Count > 3)
-                        returner.EspnTertiaryKickReturner = espnKickReturners[3].Text;
+                        returner.EspnTertiaryKickReturner = espnKickReturners[3].Text.TrimEnd(" Q", StringComparison.Ordinal).TrimEnd(" O", StringComparison.Ordinal);
                 }
 
                 var espnPuntReturnersElement = _driver.FindElements(By.XPath("//table/tbody/tr/td[contains(.,'PR')]"));
@@ -106,18 +106,18 @@ namespace RML.Returners
                     var espnPuntReturners = espnPuntReturnersElement[0].FindElements(By.XPath("./parent::tr/td"));
 
                     if (espnPuntReturners.Count > 1)
-                        returner.EspnPrimaryPuntReturner = espnPuntReturners[1].Text;
+                        returner.EspnPrimaryPuntReturner = espnPuntReturners[1].Text.TrimEnd(" Q", StringComparison.Ordinal).TrimEnd(" O", StringComparison.Ordinal);
 
                     if (espnPuntReturners.Count > 2)
                     {
                         if (espnPuntReturners[0].Text == string.Empty)
-                            returner.EspnPrimaryPuntReturner = espnPuntReturners[2].Text;
+                            returner.EspnPrimaryPuntReturner = espnPuntReturners[1].Text.TrimEnd(" Q", StringComparison.Ordinal).TrimEnd(" O", StringComparison.Ordinal);
                         else
-                            returner.EspnSecondaryPuntReturner = espnPuntReturners[2].Text;
+                            returner.EspnSecondaryPuntReturner = espnPuntReturners[2].Text.TrimEnd(" Q", StringComparison.Ordinal).TrimEnd(" O", StringComparison.Ordinal);
                     }
 
                     if (espnPuntReturners.Count > 3)
-                        returner.EspnTertiaryPuntReturner = espnPuntReturners[3].Text;
+                        returner.EspnTertiaryPuntReturner = espnPuntReturners[3].Text.TrimEnd(" Q", StringComparison.Ordinal).TrimEnd(" O", StringComparison.Ordinal);
                 }
 
                 //ourlads
