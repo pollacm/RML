@@ -28,7 +28,7 @@ namespace RML.Trophies
         public string GetTrophyBody()
         {
             var op = JsonConvert.DeserializeObject<PlayerOfTheWeek>(AdditionalInfo);
-            return $"[player#{op.PlayerId}]{op.Name.ToUpper()}[/player] ({op.Team.ToUpper()})" + @"
+            return $"[player#{op.PlayerId}]{op.Name.ToUpper()}[/player] ({op.Team.ToUpper()}) VS. {op.TeamAgainstAbbreviation.ToUpper()} - {op.Points} POINTS!!!!!)" + @"
 
                 [image]<update>[/image]";
         }

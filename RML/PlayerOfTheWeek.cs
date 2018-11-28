@@ -11,6 +11,7 @@ namespace RML
         public string Name { get; set; }
         public string Team { get; set; }
         public string TeamAbbreviation { get; set; }
+        public string TeamAgainstAbbreviation { get; set; }
         public int PlayerId { get; set; }
         public decimal Points { get; set; }
     }

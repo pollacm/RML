@@ -49,8 +49,8 @@ namespace RML.Trophies
             var showcaseDropdown = new SelectElement(showcase);
             showcaseDropdown.SelectByText("Yes");
 
-            //_driver.FindElement(By.Name("btnSubmit")).Click();
-            //_driver.WaitUntilElementExists(By.ClassName("bodyCopy"));
+            _driver.FindElement(By.Name("btnSubmit")).Click();
+            _driver.WaitUntilElementExists(By.ClassName("bodyCopy"));
 
             Thread.Sleep(2000);
 

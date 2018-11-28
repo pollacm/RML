@@ -23,7 +23,7 @@ namespace RML
     internal class Program
     {
         private static readonly int year = 2018;
-        private static readonly int week = 1;
+        private static readonly int week = 12;
 
         private static void Main(string[] args)
         {
@@ -81,9 +81,9 @@ namespace RML
             //var teams = teamBuilder.BuildTeams();
             //teamRepository.RefreshTeams(teams);
             //var teams = teamRepository.GetTeams();
-
+            
             driver.WaitUntilElementExists(By.CssSelector("table.tableBody"));
-
+            
             //OPS
             driver.Navigate().GoToUrl($"http://games.espn.com/ffl/freeagency?leagueId=127291&seasonId={year}");
             driver.WaitUntilElementExists(By.Id("playerTableContainerDiv"));
@@ -125,6 +125,13 @@ namespace RML
                 opOfTheWeek.PlayerId = int.Parse(opRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).GetAttribute("playerid"));
                 opOfTheWeek.Points = rowPoints;
 
+                opRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).Click();
+                Thread.Sleep(2000);
+                opOfTheWeek.TeamAgainstAbbreviation = driver.FindElement(By.XPath($"//div[@id='pcBorder']/table/tbody/tr[{week + 1}]/td[2]/a")).Text;
+
+                driver.FindElement(By.XPath("//img[@id='fpop_closebtn']")).Click();
+                Thread.Sleep(500);
+
                 opsOfTheWeek.Add(opOfTheWeek);
             }
 
@@ -155,6 +162,13 @@ namespace RML
                 dpOfTheWeek.TeamAbbreviation = dpRow.FindElement(By.XPath("./td[3]/a")).Text;
                 dpOfTheWeek.PlayerId = int.Parse(dpRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).GetAttribute("playerid"));
                 dpOfTheWeek.Points = rowPoints;
+
+                dpRow.FindElement(By.XPath("./td[@class='playertablePlayerName']/a")).Click();
+                Thread.Sleep(2000);
+                dpOfTheWeek.TeamAgainstAbbreviation = driver.FindElement(By.XPath($"//div[@id='pcBorder']/table/tbody/tr[{week + 1}]/td[2]/a")).Text;
+
+                driver.FindElement(By.XPath("//img[@id='fpop_closebtn']")).Click();
+                Thread.Sleep(500);
 
                 dpsOfTheWeek.Add(dpOfTheWeek);
             }
